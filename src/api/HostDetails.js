@@ -1,4 +1,4 @@
 const Details = {
-  domain: "http://localhost:56000/",
+  domain: "https://project-voice.onrender.com/",
 };
 export { Details };
