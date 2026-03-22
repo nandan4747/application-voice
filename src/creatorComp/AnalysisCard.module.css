@@ -1,0 +1,59 @@
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #facc15;
+}
+
+.songInfo {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.iconCircle {
+  background: rgba(250, 204, 21, 0.1);
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.songInfo h3 { color: white; margin: 0; font-size: 1.1rem; }
+
+.genreTag {
+  font-size: 0.75rem;
+  color: #facc15;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.statsGrid {
+  display: flex;
+  gap: 20px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b3b3b3;
+  font-size: 0.9rem;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 10px;
+}

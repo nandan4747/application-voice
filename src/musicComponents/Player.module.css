@@ -1,0 +1,138 @@
+.playerContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #18181b; /* Zinc-900 */
+  border-top: 1px solid #27272a; /* Zinc-800 */
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+@media (min-width: 768px) {
+  .playerContainer {
+    flex-direction: row;
+  }
+}
+
+.songInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .songInfo {
+    width: 33.33%;
+  }
+}
+
+.albumArt {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(to bottom right, #a855f7, #ec4899);
+  border-radius: 0.375rem;
+}
+
+.songDetails h4 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 10rem;
+}
+
+.songDetails p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #a1a1aa;
+}
+
+.controlsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .controlsSection {
+    width: 50%;
+    margin-top: 0;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.playButton {
+  background-color: white;
+  color: black;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.playButton:hover {
+  transform: scale(1.05);
+}
+
+.progressBarContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 28rem;
+}
+
+.timeLabel {
+  font-size: 10px;
+  color: #71717a;
+}
+
+/* The Modern Slider Styling */
+.slider {
+  width: 100%;
+  height: 4px;
+  background: #3f3f46;
+  border-radius: 8px;
+  appearance: none;
+  cursor: pointer;
+  accent-color: #a855f7; /* Modern purple */
+}
+
+.likeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.likeButton:active {
+  transform: scale(1.2);
+}
+.liked {
+  color: #ef4444;
+}
+.notLiked {
+  color: #52525b;
+}

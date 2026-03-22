@@ -1,0 +1,58 @@
+.dashboard {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+}
+
+.header {
+  margin-bottom: 40px;
+}
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 5px;
+}
+.header p {
+  color: #888;
+}
+
+.overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin-bottom: 50px;
+}
+
+.statCard {
+  background: linear-gradient(145deg, #1e1e1e, #121212);
+  padding: 25px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.statCard h4 {
+  color: #888;
+  margin: 0;
+  font-weight: 400;
+}
+.statCard h2 {
+  font-size: 2rem;
+  margin: 5px 0 0;
+}
+
+.songGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 100px;
+  color: #666;
+  font-style: italic;
+}

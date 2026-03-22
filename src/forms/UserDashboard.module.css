@@ -1,0 +1,78 @@
+/* Container for the form */
+.passwordForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  max-width: 400px;
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03); /* Subtle glass effect */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Style for the input fields */
+.input {
+  
+  padding: 0.8rem 1rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #1db954; /* Green glow for focus */
+  background: #222;
+  box-shadow: 0 0 8px rgba(29, 185, 84, 0.2);
+}
+
+/* The "Update Secret Code" Button */
+.saveBtn {
+  background-color: #1db954;
+  color: #000;
+  padding: 0.9rem;
+  border-radius: 30px; /* Rounded pill style */
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+.saveBtn:hover {
+  background-color: #1ed760;
+  transform: scale(1.02); /* Slight pop out effect */
+}
+
+.saveBtn:active {
+  transform: scale(0.98); /* Feel the click */
+}
+
+/* Success/Error Message Styling */
+.statusMsg {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 4px;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

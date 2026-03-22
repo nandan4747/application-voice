@@ -1,0 +1,117 @@
+.main {
+  width: 100%;
+  height: 70px;
+  background-color: rgba(21, 21, 21, 0.26);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.logo_container {
+  height: 70px;
+  width: 70px;
+  position: relative;
+}
+
+.logo_container img {
+  height: 100%;
+  width: 100%;
+}
+
+/* ── Desktop searchbar ── */
+.searchbar {
+  width: 35%;
+  height: 35px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  transition: width 0.3s ease;
+}
+
+.searchbar input {
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+  border: 0px;
+  background-color: rgba(255, 255, 255, 0.129);
+  text-align: center;
+  color: white;
+  outline: none;
+  transition: background-color 0.2s ease;
+}
+
+.searchbar input:focus {
+  background-color: rgb(8, 5, 27);
+}
+
+.cancelBtn {
+  display: none; /* hidden by default, shown via JS on mobile */
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 6px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.cancelBtn:hover {
+  color: white;
+}
+
+.user {
+  margin-right: 3%;
+  color: white;
+}
+
+.user:hover {
+  color: rgb(162, 0, 255);
+}
+
+.logo_section {
+  display: flex;
+  transition:
+    opacity 0.2s ease,
+    width 0.3s ease;
+}
+
+.logo_text {
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+}
+
+/* ── Mobile breakpoint ── */
+@media (max-width: 600px) {
+  .searchbar {
+    width: 50%; /* reasonable default on mobile */
+  }
+
+  /* When search is active on mobile */
+  .searchbarExpanded {
+    width: calc(100% - 24px); /* full width minus some padding */
+    margin: 0 12px;
+  }
+
+  .searchbarExpanded input {
+    text-align: left;
+    padding-left: 12px;
+  }
+
+  /* Show cancel button on mobile when expanded */
+  .searchbarExpanded .cancelBtn {
+    display: flex;
+  }
+
+  /* Hide logo and user when search is active */
+  .hidden {
+    display: none !important;
+  }
+
+  /* Adjust main when search is expanded */
+  .searchExpanded {
+    justify-content: center;
+  }
+}

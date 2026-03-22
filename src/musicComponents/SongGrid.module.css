@@ -1,0 +1,187 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap");
+
+.container {
+  margin: 40px 0;
+  padding: 0 5%;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.eyebrow {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #df15fa;
+  margin: 0;
+}
+
+.title {
+  font-family: "Syne", sans-serif;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.03em;
+  text-transform: capitalize;
+  margin: 0;
+  line-height: 1;
+}
+
+.divider {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.08), transparent);
+  margin-bottom: 4px;
+}
+
+/* ── Scroll Row ── */
+.scrollRow {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 14px;
+  padding: 8px 2px 24px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollRow::-webkit-scrollbar {
+  display: none;
+}
+
+.cardWrapper {
+  flex: 0 0 auto;
+  /* staggered fade-in */
+  animation: fadeSlideUp 0.4s ease both;
+}
+
+.cardWrapper:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.cardWrapper:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.cardWrapper:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.cardWrapper:nth-child(4) {
+  animation-delay: 0.16s;
+}
+.cardWrapper:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.cardWrapper:nth-child(6) {
+  animation-delay: 0.24s;
+}
+.cardWrapper:nth-child(7) {
+  animation-delay: 0.28s;
+}
+.cardWrapper:nth-child(8) {
+  animation-delay: 0.32s;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Skeleton Loaders ── */
+.skeletonRow {
+  display: flex;
+  gap: 14px;
+  padding: 8px 2px 24px;
+}
+
+.skeleton {
+  flex: 0 0 175px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeletonImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.skeletonTitle {
+  height: 13px;
+  width: 75%;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  animation: shimmer 1.6s ease-in-out infinite;
+  animation-delay: 0.15s;
+}
+
+.skeletonSub {
+  height: 10px;
+  width: 45%;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: shimmer 1.6s ease-in-out infinite;
+  animation-delay: 0.25s;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ── Empty State ── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.emptyText {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.25);
+  margin: 0;
+}

@@ -1,0 +1,28 @@
+.sectionWrapper {
+  padding: 20px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  color: #facc15; /* That gold accent you like */
+  font-family: "Arial", sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  border-left: 4px solid #facc15;
+  padding-left: 15px;
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between the rows */
+}
+
+.statusText {
+  color: #666;
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+}
