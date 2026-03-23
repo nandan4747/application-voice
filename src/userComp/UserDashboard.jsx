@@ -28,7 +28,16 @@ const MENU_OPTIONS = [
   { id: "genres", label: "Genres", icon: <Music2 size={17} /> },
 ];
 
-const GENRES = ["pop", "anime", "rock", "romance", "classic", "sad", "epic"];
+const GENRES = [
+  "pop",
+  "anime",
+  "rock",
+  "romance",
+  "classic",
+  "sad",
+  "epic",
+  "melody",
+];
 
 /* ── Skeleton loader ── */
 const Skeleton = () => (

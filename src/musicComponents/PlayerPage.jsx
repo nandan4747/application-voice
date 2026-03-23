@@ -170,12 +170,24 @@ const PlayerPage = () => {
           left: "0px",
           top: "0px",
         }}
-      > <NavBar/></div>
+      >
+        {" "}
+        <NavBar />
+      </div>
       <audio
         ref={audioRef}
         src={song.song_src} // From your response structure
         onTimeUpdate={onTimeUpdate}
         onLoadedMetadata={onLoadedMetadata}
+        onCanPlay={(e) => {
+          try {
+            e.target.play();
+            setIsPlaying(true);
+          } catch (error) {
+            console.error("unable to autoplay , click play button manually");
+          }
+        }}
+        onEnded={() => handleNavigation("next")}
       />
       <div className={styles.topSection}>
         <h1>NOW PLAYING</h1>
@@ -214,7 +226,6 @@ const PlayerPage = () => {
           }}
           type="button"
           onClick={() => {
-            console.log("clicked");
             toggleModal();
           }}
         >
