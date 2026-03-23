@@ -76,7 +76,9 @@ const PlayerPage = () => {
   const showToast = (msg, flag) => {
     setToast({ show: true, message: msg, type: flag });
   };
-
+  const closeToast = () => {
+    setToast({ show: false });
+  };
   const toggleModal = () => {
     setIsPlaylistOpen(!isPlaylistOpen);
   };
@@ -306,7 +308,7 @@ const PlayerPage = () => {
         <Toast
           message={toast.message}
           type={toast.type}
-          onClose={() => setToast({ ...toast, show: false })}
+          onClose={() => closeToast}
         />
       )}
     </div>
