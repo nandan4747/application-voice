@@ -11,6 +11,7 @@ import PlaylistDisplay from "../playlistComp/PlaylistDisplay";
 import CreatePlaylistModal from "../playlistComp/CreatePlaylistModal";
 import { useMusic } from "../MusicContext";
 import { useNavigate } from "react-router-dom";
+import { useCallback } from "react";
 import NavBar from "../navbarComp/Navbar";
 const PlayerPage = () => {
   const { id } = useParams();
@@ -76,9 +77,11 @@ const PlayerPage = () => {
   const showToast = (msg, flag) => {
     setToast({ show: true, message: msg, type: flag });
   };
-  const closeToast = () => {
-    setToast({ show: false });
-  };
+
+const closeToast = useCallback(() => {
+  setToast({ show: false, message: "", type: "success" });
+}, []);
+
   const toggleModal = () => {
     setIsPlaylistOpen(!isPlaylistOpen);
   };
@@ -308,7 +311,7 @@ const PlayerPage = () => {
         <Toast
           message={toast.message}
           type={toast.type}
-          onClose={() => closeToast}
+         onClose={closeToast}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 .main {
-  width: 100%;
+  max-width: 100vw;
   height: 70px;
   background-color: rgba(21, 21, 21, 0.26);
   display: flex;
