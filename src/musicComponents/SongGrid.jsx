@@ -18,36 +18,48 @@ const SkeletonGrid = () => (
   </div>
 );
 
-const SongGrid = ({ title, apiUrl }) => {
+const SongGrid = ({ title, apiUrl, seeMore = false }) => {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cursor, setCursor] = useState(null); // Initialize as null
   const { cache, setCacheData } = useMusic();
 
-  useEffect(() => {
-    if (!apiUrl) return;
-
-    const fetchSongs = async () => {
-      setLoading(true);
-      try {
-        if (cache[apiUrl]) {
-          setSongs(cache[apiUrl]);
-          return;
-        }
-        const response = await fetch(`${Details.domain}${apiUrl}`);
-        if (response.ok) {
-          const data = await response.json();
-          const tracks = data.songs || [];
-          setSongs(tracks);
-          setCacheData(apiUrl, tracks);
-        }
-      } catch (error) {
-        console.error("SongGrid fetch error:", error);
-      } finally {
+  const loadData = async (isNextBatch = false) => {
+    setLoading(true);
+    try {
+      // 1. Check Cache only for the very first load
+      if (!isNextBatch && cache[apiUrl]) {
+        setSongs(cache[apiUrl]);
         setLoading(false);
+        return;
       }
-    };
 
-    fetchSongs();
+      // 2. Build URL: append cursor only if it's a "Load More" action
+      const requestUrl = isNextBatch
+        ? `${Details.domain}${apiUrl}?cursor=${cursor}`
+        : `${Details.domain}${apiUrl}`;
+
+      const response = await fetch(requestUrl);
+      if (response.ok) {
+        const data = await response.json();
+        const newTracks = data.songs || [];
+
+        // 3. APPEND if next batch, REPLACE if initial load
+        setSongs((prev) => (isNextBatch ? [...prev, ...newTracks] : newTracks));
+
+        // 4. Update cursor and cache
+        setCursor(data.nextCursor || null);
+        if (!isNextBatch) setCacheData(apiUrl, newTracks);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData(false); // Initial load
   }, [apiUrl]);
 
   return (
@@ -74,6 +86,27 @@ const SongGrid = ({ title, apiUrl }) => {
               />
             </div>
           ))}
+
+          {seeMore && cursor && (
+            <div
+              className={styles.seeMoreWrapper}
+              onClick={() => loadData(true)}
+            >
+              <div className={styles.seeMoreBtn}>
+                <span className={styles.seeMoreLabel}>Load More</span>
+                <svg
+                  className={styles.seeMoreIcon}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                  <circle cx="19" cy="12" r="1.5" fill="currentColor" />
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className={styles.emptyState}>

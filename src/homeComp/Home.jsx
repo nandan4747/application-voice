@@ -19,13 +19,21 @@ const Home = () => {
       <div className={Styles.contents}>
         {
           // recently uploaded
-          <SongGrid apiUrl={"user/songs/recent"} title={"New Releases"} />
+          <SongGrid
+            seeMore={true}
+            apiUrl={"user/songs/recent"}
+            title={"New Releases"}
+          />
         }
         {
           // most played
         }
 
-        <SongGrid apiUrl={"user/mostplayed"} title={"Most played"} />
+        <SongGrid
+          seeMore={true}
+          apiUrl={"user/mostplayed"}
+          title={"Most played"}
+        />
         {
           // most liked songs
           <SongGrid apiUrl={"user/mostliked"} title={"Most Liked"} />
