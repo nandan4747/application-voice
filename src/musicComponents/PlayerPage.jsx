@@ -13,6 +13,8 @@ import { useMusic } from "../MusicContext";
 import { useNavigate } from "react-router-dom";
 import { useCallback } from "react";
 import NavBar from "../navbarComp/Navbar";
+import MusicVisual from "../animations/MusicVisual";
+
 const PlayerPage = () => {
   const { id } = useParams();
   const [song, setSong] = useState(null);
@@ -78,9 +80,9 @@ const PlayerPage = () => {
     setToast({ show: true, message: msg, type: flag });
   };
 
-const closeToast = useCallback(() => {
-  setToast({ show: false, message: "", type: "success" });
-}, []);
+  const closeToast = useCallback(() => {
+    setToast({ show: false, message: "", type: "success" });
+  }, []);
 
   const toggleModal = () => {
     setIsPlaylistOpen(!isPlaylistOpen);
@@ -195,7 +197,9 @@ const closeToast = useCallback(() => {
         onEnded={() => handleNavigation("next")}
       />
       <div className={styles.topSection}>
-        <h1>NOW PLAYING</h1>
+        <div>
+          <MusicVisual />
+        </div>
       </div>
       <div className={styles.imageContainer}>
         <img
@@ -308,11 +312,7 @@ const closeToast = useCallback(() => {
         onClose={() => setIsCreatePlaylistOpen(false)}
       />
       {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-         onClose={closeToast}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
     </div>
   );
