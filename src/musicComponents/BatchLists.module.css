@@ -1,0 +1,99 @@
+.page {
+  min-height: 100vh;
+  background-color: #0d0d0d;
+  color: white;
+}
+
+.navbarWrapper {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 120px 24px 80px;
+}
+
+.waveWrapper {
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  color: #ffffff;
+}
+
+.trackCount {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.loaderWrapper {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.loadMoreWrapper {
+  display: flex;
+  justify-content: center;
+  padding: 36px 0 0;
+}
+
+.loadMoreBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 28px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loadMoreBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.85);
+  transform: scale(1.03);
+}
+
+.loadMoreBtn:active {
+  transform: scale(0.97);
+}
+
+.loadMoreBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loadMoreLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.loadMoreIcon {
+  width: 20px;
+  height: 20px;
+}

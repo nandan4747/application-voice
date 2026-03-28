@@ -4,6 +4,7 @@ import styles from "./SongGrid.module.css";
 import { Details } from "../api/HostDetails";
 import { useMusic } from "../MusicContext";
 import { cursors } from "../api/cursors";
+import { useNavigate } from "react-router-dom";
 
 const SKELETON_COUNT = 6;
 
@@ -26,36 +27,27 @@ const SongGrid = ({ title, apiUrl, seeMore = false, cursorKey = "" }) => {
   const { cache, setCacheData } = useMusic();
   // We don't really need local cursor state if we use the global cursors object
   const [hasMore, setHasMore] = useState(true);
-
-  const fetchSongs = async (isLoadMore = false) => {
+  const nav = useNavigate();
+  const fetchSongs = async () => {
     setLoading(true);
     try {
       // 1. Initial Cache Check (Only for first load)
-      if (!isLoadMore && cache[apiUrl]) {
+      if (cache[apiUrl]) {
         setSongs(cache[apiUrl]);
         setLoading(false);
         return;
       }
 
       let finalUrl = `${Details.domain}${apiUrl}`;
-      if (isLoadMore && cursorKey && cursors[cursorKey]) {
-        finalUrl += `?cursor=${cursors[cursorKey]}`;
-      }
 
       const response = await fetch(finalUrl);
       if (response.ok) {
         const data = await response.json();
         const newTracks = data.songs || [];
 
-        // 2. Calculate the updated full list
-        // If we are loading more, combine old songs with new ones.
-        const updatedList = isLoadMore ? [...songs, ...newTracks] : newTracks;
+        setSongs(newTracks);
+        setCacheData(apiUrl, newTracks);
 
-        // 3. Update Local State AND Global Cache
-        setSongs(updatedList);
-        setCacheData(apiUrl, updatedList); // Always update the cache with the full list!
-
-        // 4. Handle Cursors
         if (cursorKey) {
           cursors[cursorKey] = data.nextCursor || "";
           setHasMore(!!data.nextCursor);
@@ -70,7 +62,7 @@ const SongGrid = ({ title, apiUrl, seeMore = false, cursorKey = "" }) => {
 
   useEffect(() => {
     if (!apiUrl) return;
-    fetchSongs(false); // Initial load
+    fetchSongs();
   }, [apiUrl]);
 
   return (
@@ -103,7 +95,14 @@ const SongGrid = ({ title, apiUrl, seeMore = false, cursorKey = "" }) => {
           {seeMore && hasMore && (
             <div
               className={styles.seeMoreWrapper}
-              onClick={() => fetchSongs(true)}
+              onClick={() => {
+                nav("/batchplay", {
+                  state: {
+                    apiUrl,
+                    cursorKey,
+                  },
+                });
+              }}
             >
               {" "}
               <div className={styles.seeMoreBtn}>

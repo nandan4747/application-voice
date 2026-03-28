@@ -13,6 +13,7 @@ import PlaylistDisplay from "./playlistComp/PlaylistDisplay";
 import UserDashboard from "./userComp/UserDashboard";
 import PlaylistSongs from "./playlistComp/PlaylistSongs";
 import NavBar from "./navbarComp/Navbar";
+import { BatchLists } from "./musicComponents/BatchLists";
 
 function App() {
   return (
@@ -22,14 +23,13 @@ function App() {
         <Route path="/play/:id" element={<PlayerPage />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/creator/auth" element={<CreatorAuth />} />
-        <Route path="/creator/dashboard" element={<CreatorDashboard />} />{" "}
-        {/* ← was missing */}
+        <Route path="/creator/dashboard" element={<CreatorDashboard />} />
         <Route path="/studio" element={<CreatorDashboard />} />
         <Route path="/creator/upload" element={<UploadModal />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/playlist" element={<PlaylistSongs />} />
         <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/temp" element={<NavBar />} />
+        <Route path="/batchplay" element={<BatchLists />} />
       </Routes>
     </MusicProvider>
   );

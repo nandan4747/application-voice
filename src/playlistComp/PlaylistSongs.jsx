@@ -1,11 +1,10 @@
 import styles from "./PlaylistSongs.module.css";
 import SongListSection from "../musicComponents/SongListSection";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 const PlaylistSongs = () => {
   const loc = useLocation();
-  const nav = useNavigate();
   const playlistId = loc.state?.playlistId;
   const playlistName = loc.state?.playlistName ?? "Playlist";
   const imageUrl = `https://picsum.photos/seed/${playlistId + 200}/300/300`;
