@@ -20,6 +20,7 @@ const Home = () => {
         {
           // recently uploaded
           <SongGrid
+            cursorKey="recent"
             seeMore={true}
             apiUrl={"user/songs/recent"}
             title={"New Releases"}
@@ -30,6 +31,7 @@ const Home = () => {
         }
 
         <SongGrid
+          cursorKey="mostPlayed"
           seeMore={true}
           apiUrl={"user/mostplayed"}
           title={"Most played"}
