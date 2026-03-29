@@ -1,7 +1,6 @@
 import NavBar from "../navbarComp/Navbar";
 import Styles from "./HomeStyle.module.css";
-import SongCard from "../musicComponents/SongCard";
-import SongListItem from "../musicComponents/SongListItem";
+import { relation } from "../api/relationalGenre";
 import SongGrid from "../musicComponents/SongGrid";
 import SongListSection from "../musicComponents/SongListSection";
 
@@ -11,6 +10,7 @@ const Home = () => {
   const [genre, setGenre] = useState(() => {
     return localStorage.getItem("genre") || "pop";
   });
+  const relationalGenre = relation[genre];
   return (
     <div className={Styles.main}>
       <div className={Styles.nav}>
@@ -28,10 +28,16 @@ const Home = () => {
         }
 
         {genre && (
-          <SongListSection
-            apiUrl={`user/recommendation?genre=${genre}`}
-            title={"For You"}
-          />
+          <div className={Styles.genre_holder}>
+            <SongListSection
+              apiUrl={`user/recommendation?genre=${genre}`}
+              title={"For You"}
+            />
+            <SongListSection
+              apiUrl={`user/recommendation?genre=${relationalGenre}`}
+              title={"You may Like these ;)"}
+            ></SongListSection>
+          </div>
         )}
         {
           // most played

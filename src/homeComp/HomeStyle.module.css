@@ -27,3 +27,19 @@
   font-weight: 800;
   color: white;
 }
+.genre_holder {
+  display: flex;
+  flex-direction: row;
+  background-color: rgba(31, 2, 59, 0.196);
+  justify-content: center;
+  width: 90vw;
+ justify-self: center;
+ border: 0.1px solid rgba(157, 0, 255, 0.225);
+ border-radius: 24px;
+}
+
+@media (max-width: 700px) {
+  .genre_holder {
+    flex-direction: column;
+  }
+}

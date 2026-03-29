@@ -6,11 +6,11 @@
 }
 
 .sectionTitle {
-  color: #facc15; /* That gold accent you like */
-  font-family: "Arial", sans-serif;
-  font-size: 1.5rem;
+  color: #cc15fa; /* That gold accent you like */
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 1rem;
   margin-bottom: 20px;
-  border-left: 4px solid #facc15;
+  border-left: 4px solid #cc15fa;
   padding-left: 15px;
 }
 
