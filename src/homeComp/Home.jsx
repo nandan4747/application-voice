@@ -26,6 +26,13 @@ const Home = () => {
             title={"New Releases"}
           />
         }
+
+        {genre && (
+          <SongListSection
+            apiUrl={`user/recommendation?genre=${genre}`}
+            title={"For You"}
+          />
+        )}
         {
           // most played
         }
@@ -40,13 +47,6 @@ const Home = () => {
           // most liked songs
           <SongGrid apiUrl={"user/mostliked"} title={"Most Liked"} />
         }
-
-        {genre && (
-          <SongListSection
-            apiUrl={`user/recommendation?genre=${genre}`}
-            title={"For You"}
-          />
-        )}
       </div>
     </div>
   );
