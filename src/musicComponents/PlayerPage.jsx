@@ -1,22 +1,33 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { Heart, Play, Pause, SkipForward, SkipBack } from "lucide-react";
-import { getSongDetails, checkSongLikedFlag } from "../api/songFunctions";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Heart,
+  ListPlus,
+  SkipForward,
+  SkipBack,
+  Play,
+  Pause,
+} from "lucide-react";
+import {
+  getSongDetails,
+  checkSongLikedFlag,
+  toggleLikeStatus,
+} from "../api/songFunctions";
 import styles from "./PlayerPage.module.css";
-import { toggleLikeStatus } from "../api/songFunctions";
 import SearchLoader from "../animations/SearchLoader";
 import Toast from "../NotificationComp/Toast";
 import PlaylistDisplay from "../playlistComp/PlaylistDisplay";
 import CreatePlaylistModal from "../playlistComp/CreatePlaylistModal";
 import { useMusic } from "../MusicContext";
-import { useNavigate } from "react-router-dom";
-import { useCallback } from "react";
 import NavBar from "../navbarComp/Navbar";
 import MusicVisual from "../animations/MusicVisual";
 
 const PlayerPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { cache } = useMusic();
+  const audioRef = useRef(null);
+
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -24,293 +35,262 @@ const PlayerPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
-  const { cache, setCacheData } = useMusic();
-  const navigate = useNavigate();
-
-  const handleNavigation = (direction) => {
-    try {
-      const rawData = localStorage.getItem("playersequence");
-
-      if (!rawData || rawData === "[object Object]") {
-        console.error(
-          "Storage is corrupted or empty. Go back to Home and click a song.",
-        );
-        return;
-      }
-
-      const { track, currentIndex } = JSON.parse(rawData);
-      const songsInQueue = cache[track];
-
-      if (!songsInQueue) {
-        console.error("Queue not found in cache for track:", track);
-        return;
-      }
-
-      const nextIndex =
-        direction === "next" ? currentIndex + 1 : currentIndex - 1;
-
-      if (nextIndex >= 0 && nextIndex < songsInQueue.length) {
-        const nextSong = songsInQueue[nextIndex];
-
-        // Save the NEW index back to storage
-        localStorage.setItem(
-          "playersequence",
-          JSON.stringify({
-            track,
-            currentIndex: nextIndex,
-          }),
-        );
-
-        navigate(`/play/${nextSong.id}`);
-      }
-    } catch (error) {
-      console.error("Failed to parse navigation data:", error);
-    }
-  };
-
-  // Initialize the state as "hidden"
   const [toast, setToast] = useState({
     show: false,
     message: "",
     type: "success",
   });
 
-  // A helper function to trigger the toast easily
-  const showToast = (msg, flag) => {
-    setToast({ show: true, message: msg, type: flag });
-  };
+  const showToast = (msg, type = "success") =>
+    setToast({ show: true, message: msg, type });
+  const closeToast = useCallback(
+    () => setToast({ show: false, message: "", type: "success" }),
+    [],
+  );
 
-  const closeToast = useCallback(() => {
-    setToast({ show: false, message: "", type: "success" });
-  }, []);
-
-  const toggleModal = () => {
-    setIsPlaylistOpen(!isPlaylistOpen);
-  };
-
-  const toggleCreatePlaylist = () => {
-    setIsCreatePlaylistOpen(!isCreatePlaylistOpen);
-  };
-
-  const audioRef = useRef(null);
-
+  /* ── Data fetching ── */
   useEffect(() => {
     const fetchSong = async () => {
       const res = await getSongDetails(id);
-      if (res && res.song) {
-        setSong(res.song);
-      } else {
-        console.error("Failed to fetch song or song not found");
-      }
+      if (res?.song) setSong(res.song);
     };
     fetchSong();
   }, [id]);
 
   useEffect(() => {
+    if (!id) return;
     const checkFlag = async () => {
       const res = await checkSongLikedFlag(id);
-
-      if (res && res.alreadyLiked) {
-        setIsLiked(true);
-      } else {
-        setIsLiked(false);
-      }
+      setIsLiked(!!res?.alreadyLiked);
     };
-
-    if (id) {
-      checkFlag();
-    }
+    checkFlag();
   }, [id]);
-  const handleLikeClick = async () => {
-    const previousState = isLiked;
-    setIsLiked(!isLiked);
-    const result = await toggleLikeStatus(id);
 
-    if (!result.success) {
-      setIsLiked(previousState);
-      alert(result.error);
-    } else {
-      console.log(result.message);
-    }
-  };
+  /* ── Playback handlers ── */
   const togglePlay = () => {
     if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
+    isPlaying ? audioRef.current.pause() : audioRef.current.play();
     setIsPlaying(!isPlaying);
   };
 
-  const onTimeUpdate = () => setCurrentTime(audioRef.current.currentTime);
-  const onLoadedMetadata = () => setDuration(audioRef.current.duration);
-
   const handleSliderChange = (e) => {
-    const time = e.target.value;
-    audioRef.current.currentTime = time;
-    setCurrentTime(time);
+    audioRef.current.currentTime = e.target.value;
+    setCurrentTime(Number(e.target.value));
   };
 
-  const formatTime = (time) => {
-    const mins = Math.floor(time / 60);
-    const secs = Math.floor(time % 60);
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  const formatTime = (t) => {
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  // While waiting for the API/Render to wake up
+  /* ── Queue navigation ── */
+  const handleNavigation = (direction) => {
+    try {
+      const raw = localStorage.getItem("playersequence");
+      if (!raw) return;
+      const { track, currentIndex } = JSON.parse(raw);
+      const queue = cache[track];
+      if (!queue) return;
+
+      const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
+      if (next >= 0 && next < queue.length) {
+        localStorage.setItem(
+          "playersequence",
+          JSON.stringify({ track, currentIndex: next }),
+        );
+        navigate(`/play/${queue[next].id}`);
+      }
+    } catch (e) {
+      console.error("Navigation error:", e);
+    }
+  };
+
+  /* ── Like toggle ── */
+  const handleLikeClick = async () => {
+    const prev = isLiked;
+    setIsLiked(!prev);
+    const result = await toggleLikeStatus(id);
+    if (!result.success) {
+      setIsLiked(prev);
+      showToast(result.error, "failure");
+    }
+  };
+
+  /* ── Loading state ── */
   if (!song) {
     return (
-      <div className={styles.fullPlayerContainer}>
-        <SearchLoader></SearchLoader>
+      <div className={styles.loadingScreen}>
+        <SearchLoader />
       </div>
     );
   }
 
+  const artUrl = `https://picsum.photos/seed/${song.id}/400`;
+
   return (
     <div className={styles.fullPlayerContainer}>
+      {/* Ambient background bloom */}
+      <div
+        className={styles.ambientBg}
+        style={{ backgroundImage: `url(${artUrl})` }}
+      />
+
+      {/* Fixed navbar */}
       <div
         style={{
-          height: "fit-content",
-          width: "100%",
           position: "fixed",
-          left: "0px",
-          top: "0px",
+          top: 0,
+          left: 0,
+          width: "100%",
+          zIndex: 100,
         }}
       >
-        {" "}
         <NavBar />
       </div>
+
+      {/* Hidden audio element */}
       <audio
         ref={audioRef}
-        src={song.song_src} // From your response structure
-        onTimeUpdate={onTimeUpdate}
-        onLoadedMetadata={onLoadedMetadata}
+        src={song.song_src}
+        onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
+        onLoadedMetadata={() => setDuration(audioRef.current.duration)}
         onCanPlay={(e) => {
           try {
             e.target.play();
             setIsPlaying(true);
-          } catch (error) {
-            console.error("unable to autoplay , click play button manually");
+          } catch {
+            /* autoplay blocked — user can press play */
           }
         }}
         onEnded={() => handleNavigation("next")}
       />
-      <div className={styles.topSection}>
-        <div>
+
+      <div className={styles.playerContent}>
+        {/* Visualiser */}
+        <div className={styles.topSection}>
           <MusicVisual />
         </div>
-      </div>
-      <div className={styles.imageContainer}>
-        <img
-          src={`https://picsum.photos/seed/${song.id}/400`}
-          alt="Album Art"
-          className={styles.albumArt}
-        />
-        <div
-          className={styles.imageGlow}
-          style={{
-            backgroundImage: `url(https://picsum.photos/seed/${song.id}/400)`,
-          }}
-        ></div>
-      </div>
-      <div className={styles.infoSection}>
-        <div className={styles.details}>
-          <h2>{song.title}</h2>
-          <p>{song.creator_name}</p>
-        </div>
-        <button
-          className={styles.likeButton}
-          onClick={handleLikeClick}
-          style={{ color: isLiked ? "#ef4444" : "#64748b" }}
-        >
-          <Heart fill={isLiked ? "currentColor" : "none"} size={28} />
-        </button>
 
-        <button
-          style={{
-            backgroundColor: "transparent",
-            color: "white",
-            border: "solid 0px",
-          }}
-          type="button"
-          onClick={() => {
-            toggleModal();
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-list-plus-icon lucide-list-plus"
+        {/* Album art */}
+        <div className={styles.imageContainer}>
+          <img
+            src={artUrl}
+            alt={song.title}
+            className={styles.albumArt}
+            draggable={false}
+          />
+          <div
+            className={styles.imageGlow}
+            style={{ backgroundImage: `url(${artUrl})` }}
+          />
+        </div>
+
+        {/* Song info + action buttons */}
+        <div className={styles.infoSection}>
+          <div className={styles.details}>
+            <h2>{song.title}</h2>
+            <p>{song.creator_name}</p>
+          </div>
+
+          {/* Like */}
+          <button
+            className={`${styles.actionBtn} ${isLiked ? styles.actionBtnLiked : ""}`}
+            onClick={handleLikeClick}
+            aria-label={isLiked ? "Unlike" : "Like"}
           >
-            <path d="M16 5H3" />
-            <path d="M11 12H3" />
-            <path d="M16 19H3" />
-            <path d="M18 9v6" />
-            <path d="M21 12h-6" />
-          </svg>
-        </button>
-      </div>
-      <div className={styles.controlsSection}>
-        <input
-          type="range"
-          className={styles.slider}
-          min="0"
-          max={duration || 0}
-          value={currentTime}
-          onChange={handleSliderChange}
-        />
-        <div className={styles.timeInfo}>
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
+            <Heart
+              size={18}
+              fill={isLiked ? "currentColor" : "none"}
+              strokeWidth={1.8}
+            />
+          </button>
+
+          {/* Add to playlist */}
+          <button
+            className={styles.actionBtn}
+            onClick={() => setIsPlaylistOpen(true)}
+            aria-label="Add to playlist"
+          >
+            <ListPlus size={18} strokeWidth={1.8} />
+          </button>
         </div>
 
-        <div className={styles.mainButtons}>
-          <SkipBack
-            size={32}
-            fill="white"
-            cursor="pointer"
-            onClick={() => handleNavigation("prev")}
+        {/* Controls */}
+        <div className={styles.controlsSection}>
+          <input
+            type="range"
+            className={styles.slider}
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            step="0.1"
+            onChange={handleSliderChange}
           />
-          <button className={styles.playPauseBtn} onClick={togglePlay}>
-            {isPlaying ? (
-              <Pause size={35} fill="black" />
-            ) : (
-              <Play size={35} fill="black" style={{ marginLeft: "4px" }} />
-            )}
-          </button>
-          <SkipForward
-            size={32}
-            fill="white"
-            cursor="pointer"
-            onClick={() => handleNavigation("next")}
-          />
+          <div className={styles.timeInfo}>
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+
+          <div className={styles.mainButtons}>
+            <button
+              className={styles.skipBtn}
+              onClick={() => handleNavigation("prev")}
+              aria-label="Previous"
+            >
+              <SkipBack size={28} fill="currentColor" />
+            </button>
+
+            <button
+              className={styles.playPauseBtn}
+              onClick={togglePlay}
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? (
+                <Pause size={28} fill="black" color="black" />
+              ) : (
+                <Play
+                  size={28}
+                  fill="black"
+                  color="black"
+                  style={{ marginLeft: 3 }}
+                />
+              )}
+            </button>
+
+            <button
+              className={styles.skipBtn}
+              onClick={() => handleNavigation("next")}
+              aria-label="Next"
+            >
+              <SkipForward size={28} fill="currentColor" />
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Modals */}
       <PlaylistDisplay
         show={isPlaylistOpen}
         songId={id}
-        setToast={showToast} // Pass the actual function
-        onClose={() => setIsPlaylistOpen(false)} // Pass the close handler
-        onNewPlaylist={toggleCreatePlaylist}
+        setToast={showToast}
+        onClose={() => setIsPlaylistOpen(false)}
+        onNewPlaylist={() => {
+          setIsPlaylistOpen(false);
+          setIsCreatePlaylistOpen(true);
+        }}
         closeFromOutside={() => setIsPlaylistOpen(false)}
       />
+
       <CreatePlaylistModal
         show={isCreatePlaylistOpen}
         onSuccess={() => {
-          showToast("New playlist created!!", "success");
+          showToast("Playlist created!", "success");
           setIsCreatePlaylistOpen(false);
-          setIsPlaylistOpen(false);
         }}
         onClose={() => setIsCreatePlaylistOpen(false)}
       />
+
       {toast.show && (
         <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}

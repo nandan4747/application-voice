@@ -24,32 +24,44 @@ const SearchPage = () => {
   }, [query]);
 
   return (
-    <div className={styles.main}>
-      <div className={styles.header}>
+    <div className={styles.page}>
+      <div className={styles.navbarWrapper}>
         <NavBar />
       </div>
-      <div className={styles.container}>
-        <h2 className={styles.title}>Results for: "{query}"</h2>
+
+      <div className={styles.content}>
+        <div className={styles.pageHeader}>
+          <p className={styles.eyebrow}>Search Results</p>
+          <h2 className={styles.title}>"{query}"</h2>
+          {!loading && results.length > 0 && (
+            <p className={styles.resultCount}>
+              {results.length} {results.length === 1 ? "track" : "tracks"} found
+            </p>
+          )}
+        </div>
+
         <div className={styles.list}>
           {loading ? (
-            <SearchLoader></SearchLoader>
+            <div className={styles.loaderWrapper}>
+              <SearchLoader />
+            </div>
           ) : results.length > 0 ? (
-            results.map((song) => (
+            results.map((song, index) => (
               <SongListItem
                 key={song.id}
                 songId={song.id}
                 songName={song.title}
+                currentIndex={index}
               />
             ))
           ) : (
-            <p
-              style={{
-                textAlign: "center",
-                color: "red",
-              }}
-            >
-              No tracks found...
-            </p>
+            <div className={styles.emptyState}>
+              <span className={styles.emptyIcon}>♪</span>
+              <p className={styles.emptyTitle}>No tracks found</p>
+              <p className={styles.emptySubtext}>
+                Try a different keyword or check your spelling.
+              </p>
+            </div>
           )}
         </div>
       </div>
