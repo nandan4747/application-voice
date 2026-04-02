@@ -3,18 +3,20 @@
 :root {
   --accent: #df15fa;
   --accent-dim: rgba(223, 21, 250, 0.12);
-  --bg-base: #0e0e0e;
-  --bg-surface: #161616;
-  --bg-elevated: #1e1e1e;
+  --accent-glow: rgba(223, 21, 250, 0.25);
+  --bg-base: #0a0a0a;
+  --bg-surface: #111111;
+  --bg-elevated: #181818;
+  --bg-hover: rgba(255, 255, 255, 0.04);
   --border-subtle: rgba(255, 255, 255, 0.06);
-  --text-primary: #f4f4f4;
+  --border-mid: rgba(255, 255, 255, 0.1);
+  --text-primary: #f0f0f0;
   --text-secondary: rgba(255, 255, 255, 0.45);
-  --text-muted: rgba(255, 255, 255, 0.22);
+  --text-muted: rgba(255, 255, 255, 0.2);
   --font-display: "Syne", sans-serif;
   --font-body: "DM Sans", sans-serif;
 }
 
-/* ── Page ── */
 .page {
   min-height: 100vh;
   background: var(--bg-base);
@@ -26,22 +28,21 @@
 .hero {
   position: relative;
   width: 100%;
-  padding: 56px 6% 48px;
+  padding: 64px 6% 52px;
   display: flex;
   align-items: flex-end;
-  gap: 36px;
+  gap: 40px;
   overflow: hidden;
 }
 
-/* blurred background bloom from the cover art */
 .heroBg {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: blur(80px) saturate(1.4);
-  opacity: 0.18;
-  transform: scale(1.1);
+  filter: blur(90px) saturate(1.6);
+  opacity: 0.22;
+  transform: scale(1.15);
   pointer-events: none;
   z-index: 0;
 }
@@ -50,16 +51,15 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    to bottom,
-    rgba(14, 14, 14, 0.35) 0%,
-    rgba(14, 14, 14, 0.85) 70%,
-    #0e0e0e 100%
+    160deg,
+    rgba(10, 10, 10, 0.2) 0%,
+    rgba(10, 10, 10, 0.75) 55%,
+    #0a0a0a 100%
   );
   z-index: 1;
   pointer-events: none;
 }
 
-/* ── Cover Art ── */
 .coverWrapper {
   position: relative;
   z-index: 2;
@@ -67,30 +67,29 @@
 }
 
 .cover {
-  width: 192px;
-  height: 192px;
-  border-radius: 14px;
+  width: 200px;
+  height: 200px;
+  border-radius: 16px;
   object-fit: cover;
   display: block;
   box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
+    0 32px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 
-/* ── Hero Meta ── */
 .heroMeta {
   position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   padding-bottom: 4px;
 }
 
 .eyebrow {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--accent);
   margin: 0;
@@ -98,16 +97,16 @@
 
 .playlistTitle {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.045em;
   color: var(--text-primary);
   margin: 0;
   line-height: 1;
 }
 
 .playlistMeta {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   margin: 0;
   display: flex;
@@ -123,9 +122,147 @@
   flex-shrink: 0;
 }
 
-/* ── Tracks Section ── */
+/* ── Tracks ── */
 .tracks {
-  padding: 0 6% 80px;
+  padding: 8px 6% 80px;
+}
+
+.trackHeader {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 4px;
+}
+
+.trackHeaderNum {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.trackHeaderTitle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Track Row ── */
+.trackRow {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 10px;
+  transition: background 0.15s;
+  gap: 8px;
+}
+
+.trackRow:hover {
+  background: var(--bg-hover);
+}
+
+.trackRow:hover .removeBtn {
+  opacity: 1;
+}
+
+.trackIndex {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.removeBtn {
+  opacity: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    background 0.15s;
+  margin-left: auto;
+}
+
+.removeBtn:hover {
+  color: #ff5555;
+  background: rgba(255, 85, 85, 0.1);
+}
+
+/* ── Load More ── */
+.loadMoreWrapper {
+  padding: 28px 0 0;
+  display: flex;
+  justify-content: center;
+}
+
+.loadMore {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  border-radius: 100px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
+}
+
+.loadMore:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.loadMore:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.loadDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.loadDot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.loadDot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ── Mobile ── */
@@ -134,7 +271,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 40px 5% 36px;
+    padding: 48px 5% 40px;
     gap: 24px;
   }
 
@@ -152,6 +289,10 @@
   }
 
   .tracks {
-    padding: 0 0 60px;
+    padding: 8px 4% 60px;
+  }
+
+  .removeBtn {
+    opacity: 1;
   }
 }
