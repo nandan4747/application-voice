@@ -24,8 +24,7 @@ const Home = () => {
             seeMore={true}
             apiUrl={"user/songs/recent"}
             title={"New Releases"}
-          />
-        }
+          />}
 
         {genre && (
           <div className={Styles.genre_holder}>
@@ -40,24 +39,26 @@ const Home = () => {
           </div>
         )}
         {
-          // most played
-        }
+        
 
         <SongGrid
           cursorKey="mostPlayed"
           seeMore={true}
           apiUrl={"user/mostplayed"}
           title={"Most played"}
-        />
+        /> }
         {
           // most liked songs
+          
           <SongGrid apiUrl={"user/mostliked"} title={"Most Liked"} />
+          
         }
 
         <footer className={Styles.footer}>
           <p className={Styles.disclaimer}>
-            🎵 This is a fun personal project for educational purposes. We do not promote or support music piracy.
-            Please support artists by using official streaming services.
+            🎵 This is a fun personal project for educational purposes. We do
+            not promote or support music piracy. Please support artists by using
+            official streaming services.
           </p>
         </footer>
       </div>
