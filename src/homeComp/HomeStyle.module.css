@@ -43,3 +43,23 @@
     flex-direction: column;
   }
 }
+
+/* ── Footer / Disclaimer ── */
+.footer {
+  width: 100%;
+  padding: 40px 24px;
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.disclaimer {
+  max-width: 600px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.6;
+  margin: 0;
+}

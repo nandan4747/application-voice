@@ -17,7 +17,7 @@ const PlaylistSongs = () => {
 
   const cachedSongs = useMemo(() => cache[apiUrl] ?? null, [cache, apiUrl]);
   const [fetchedSongs, setFetchedSongs] = useState([]);
-  const [nextCursor, setNextCursor] = useState(null); // ✅ local, per-playlist
+  const [nextCursor, setNextCursor] = useState(null); 
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -76,7 +76,8 @@ const PlaylistSongs = () => {
   };
 
   return (
-    <div className={styles.page}>
+  <div c
+  lassName={styles.page}>
       <section className={styles.hero}>
         <div
           className={styles.heroBg}

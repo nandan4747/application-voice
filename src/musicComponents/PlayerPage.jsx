@@ -169,7 +169,7 @@ const PlayerPage = () => {
       <div className={styles.playerContent}>
         {/* Visualiser */}
         <div className={styles.topSection}>
-          <MusicVisual />
+          <MusicVisual isPlaying={isPlaying} />
         </div>
 
         {/* Album art */}

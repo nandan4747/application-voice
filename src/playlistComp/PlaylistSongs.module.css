@@ -162,6 +162,11 @@
   gap: 8px;
 }
 
+.trackRow > *:nth-child(2) {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .trackRow:hover {
   background: var(--bg-hover);
 }

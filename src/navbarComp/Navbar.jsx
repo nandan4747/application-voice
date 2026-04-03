@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Styles from "./navstyles.module.css";
 import logo from "/logo_voice_.png";
@@ -6,8 +6,17 @@ import logo from "/logo_voice_.png";
 const NavBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [mobileSearchActive, setMobileSearchActive] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const inputRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -43,7 +52,7 @@ const NavBar = () => {
   };
 
   return (
-    <div className={`${Styles.main} ${mobileSearchActive ? Styles.searchExpanded : ""}`}>
+    <div className={`${Styles.main} ${mobileSearchActive ? Styles.searchExpanded : ""} ${scrolled ? Styles.scrolled : ""}`}>
       {/* Logo — hidden on mobile when search is active */}
       <div
         className={`${Styles.logo_section} ${mobileSearchActive ? Styles.hidden : ""}`}

@@ -53,6 +53,13 @@ const Home = () => {
           // most liked songs
           <SongGrid apiUrl={"user/mostliked"} title={"Most Liked"} />
         }
+
+        <footer className={Styles.footer}>
+          <p className={Styles.disclaimer}>
+            🎵 This is a fun personal project for educational purposes. We do not promote or support music piracy.
+            Please support artists by using official streaming services.
+          </p>
+        </footer>
       </div>
     </div>
   );
