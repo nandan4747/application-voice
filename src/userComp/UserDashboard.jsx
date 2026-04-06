@@ -138,8 +138,8 @@ const UserDashboard = () => {
             </div>
             <div className={styles.infoCard}>
               {[
-                { label: "Username", value: userData.username || "—" },
-                { label: "Email", value: userData.email || "—" },
+                { label: "Nick Name", value: userData.username || "—" },
+                { label: "username", value: userData.email || "—" },
                 {
                   label: "Status",
                   value: (

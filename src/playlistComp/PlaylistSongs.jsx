@@ -118,6 +118,8 @@ const PlaylistSongs = () => {
               currentIndex={index}
               sequnceApiUrl={apiUrl}
               songName={song.title}
+              played={song.play_count}
+              likes={song.likes_count}
             />
 
             <button

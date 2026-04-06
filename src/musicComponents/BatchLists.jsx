@@ -74,6 +74,8 @@ export const BatchLists = () => {
             <SongListItem
               key={`${song.id}-${index}`}
               songId={song.id}
+              played={song.play_count}
+              likes={song.likes_count}
               songName={song.title}
               sequnceApiUrl={apiUrl}
               currentIndex={index}

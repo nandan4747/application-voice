@@ -31,7 +31,7 @@ const CreatorAuth = () => {
 
       if (result.success) {
         localStorage.setItem("isLoggedIn", "yes");
-        navigate("/creator/dashboard");
+        navigate("/");
       } else {
         localStorage.setItem("isLoggedIn", "no");
         setError(result.error || "Something went wrong. Please try again.");
