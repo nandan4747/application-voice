@@ -71,7 +71,7 @@ const AuthPage = () => {
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
           {!isLogin && (
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>Username</label>
+              <label className={styles.label}>Nick Name</label>
               <div className={styles.inputGroup}>
                 <User size={16} className={styles.inputIcon} />
                 <input
@@ -87,12 +87,12 @@ const AuthPage = () => {
           )}
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Email</label>
+            <label className={styles.label}>username</label>
             <div className={styles.inputGroup}>
               <Mail size={16} className={styles.inputIcon} />
               <input
                 type="email"
-                placeholder="you@example.com"
+                placeholder="example : cooluser1234"
                 required
                 value={formData.email}
                 onChange={set("email")}

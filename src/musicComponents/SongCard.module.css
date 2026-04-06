@@ -1,112 +1,112 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap");
 
 .card {
-  width: 175px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 10px;
-  border-radius: 14px;
+  width: 180px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  position: relative;
   overflow: hidden;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 60% 0%, rgba(223, 21, 250, 0.06) 0%, transparent 65%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  border-radius: inherit;
+  position: relative;
 }
 
 .card:hover {
-  background: rgba(255, 255, 255, 0.065);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(223, 21, 250, 0.12);
-}
-
-.card:hover::before {
-  opacity: 1;
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
 }
 
 .imageWrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .songImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: block;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .card:hover .songImage {
-  transform: scale(1.08);
+  transform: scale(1.07);
 }
 
 .playOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    160deg,
-    rgba(0, 0, 0, 0.15) 0%,
-    rgba(0, 0, 0, 0.55) 100%
-  );
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.22s ease;
+}
+
+.card:hover .playOverlay {
+  background: rgba(0, 0, 0, 0.36);
+}
+
+.playButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.28s ease;
+  transform: scale(0.8);
+  transition:
+    opacity 0.22s ease,
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.card:hover .playOverlay {
-  opacity: 1;
-}
-
-.playButton {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(223, 21, 250, 0.9);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 0 0 8px rgba(223, 21, 250, 0.15),
-    0 8px 24px rgba(223, 21, 250, 0.45);
-  transform: scale(0.82) translateY(6px);
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+.playButton svg {
+  color: #111;
 }
 
 .card:hover .playButton {
-  transform: scale(1) translateY(0);
+  opacity: 1;
+  transform: scale(1);
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: "Outfit", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.7);
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
 }
 
 .meta {
-  padding: 2px 2px 4px;
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 8px;
 }
 
 .songTitle {
-  font-size: 0.875rem;
+  font-size: 13.5px;
   font-weight: 500;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "Outfit", sans-serif;
   color: #f1f1f1;
   white-space: nowrap;
   overflow: hidden;
@@ -115,12 +115,59 @@
   letter-spacing: -0.01em;
 }
 
+.stats {
+  display: flex;
+  gap: 12px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.stat svg {
+  flex-shrink: 0;
+  stroke: rgba(255, 255, 255, 0.3);
+}
+
+.statValue {
+  font-family: "Outfit", sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.divider {
+  height: 0.5px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .songLabel {
-  font-size: 0.72rem;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "Outfit", sans-serif;
+  font-size: 10.5px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.3);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
   margin: 0;
+}
+
+.dots {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
 }

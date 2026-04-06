@@ -1,54 +1,98 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap");
+
 .itemContainer {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  color: white;
+  transition: background 0.2s ease;
   gap: 12px;
+  position: relative;
 }
 
 .itemContainer:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .imageBox {
-  width: 45px;
-  height: 45px;
-  border-radius: 4px;
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
-  background-color: #27272a; /* Fallback color */
+  background: #27272a;
 }
 
 .coverImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.itemContainer:hover .coverImage {
+  transform: scale(1.06);
 }
 
 .textDetails {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 5px;
   min-width: 0;
-  max-width: 100%;
   overflow: hidden;
 }
 
 .title {
-  font-size: 0.95rem;
+  font-family: "Outfit", sans-serif;
+  font-size: 13.5px;
   font-weight: 500;
+  color: #f1f1f1;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: -0.01em;
 }
 
-/* Subtle "ID" or secondary text if you want it later */
-.subText {
-  font-size: 0.75rem;
-  color: #a1a1aa;
-  margin-top: 2px;
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.stat svg {
+  flex-shrink: 0;
+  stroke: rgba(255, 255, 255, 0.25);
+}
+
+.statValue {
+  font-family: "Outfit", sans-serif;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.playHint {
+  color: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.itemContainer:hover .playHint {
+  color: rgba(255, 255, 255, 0.6);
+  transform: translateX(2px);
 }

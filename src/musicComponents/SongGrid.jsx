@@ -28,6 +28,7 @@ const SongGrid = ({ title, apiUrl, seeMore = false, cursorKey = "" }) => {
   // We don't really need local cursor state if we use the global cursors object
   const [hasMore, setHasMore] = useState(true);
   const nav = useNavigate();
+
   const fetchSongs = async () => {
     setLoading(true);
     try {
@@ -89,6 +90,8 @@ const SongGrid = ({ title, apiUrl, seeMore = false, cursorKey = "" }) => {
                 songName={song.title}
                 sequnceApiUrl={apiUrl}
                 currentIndex={index}
+                played={song.play_count}
+                likes={song.likes_count}
               />{" "}
             </div>
           ))}{" "}

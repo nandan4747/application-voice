@@ -56,6 +56,8 @@ const SongListSection = ({ title, apiUrl }) => {
               key={song.id}
               songId={song.id}
               songName={song.title}
+              likes={song.likes_count}
+              played={song.play_count}
               sequnceApiUrl={apiUrl}
               currentIndex={index}
             />
