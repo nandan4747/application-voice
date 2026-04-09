@@ -99,7 +99,7 @@ const PlayerPage = () => {
           "playersequence",
           JSON.stringify({ track, currentIndex: next }),
         );
-        navigate(`/play/${queue[next].id}`);
+        navigate(`/play/${queue[next].id}`, { replace: true });
       }
     } catch (e) {
       console.error("Navigation error:", e);
