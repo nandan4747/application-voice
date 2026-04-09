@@ -4,8 +4,9 @@ import { useMusic } from "../MusicContext";
 import { useState, useEffect, useMemo } from "react";
 import { Details } from "../api/HostDetails";
 import SongListItem from "../musicComponents/SongListItem";
+import { cursors } from "../api/cursors";
 
-const PlaylistSongs = () => {
+const PlaylistSongs = ({ cursorKey = "playlist" }) => {
   const loc = useLocation();
   const playlistId = loc.state?.playlistId;
   const playlistName = loc.state?.playlistName ?? "Playlist";
@@ -17,7 +18,7 @@ const PlaylistSongs = () => {
 
   const cachedSongs = useMemo(() => cache[apiUrl] ?? null, [cache, apiUrl]);
   const [fetchedSongs, setFetchedSongs] = useState([]);
-  const [nextCursor, setNextCursor] = useState(null); 
+
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -38,9 +39,9 @@ const PlaylistSongs = () => {
       return;
     }
     const result = await res.json();
-    const newCursor = result.nextCursor || null;
-    setNextCursor(newCursor);
-    setHasMore(!!newCursor); // no nextCursor = no more pages
+
+    cursors[cursorKey] = result.nextCursor || null;
+    setHasMore(!!cursors[cursorKey]); // no nextCursor = no more pages
 
     const current = cachedSongs ?? fetchedSongs;
     const merged = [...current, ...result.songs];
@@ -51,13 +52,14 @@ const PlaylistSongs = () => {
 
   useEffect(() => {
     if (cachedSongs) return;
-    console.log("fetching");
+    //console.log("fetching");
     fetchSongs();
   }, [apiUrl, cachedSongs]);
 
   // Load more button handler
   const handleLoadMore = () => {
-    if (nextCursor && !loading) fetchSongs(nextCursor);
+    //console.log(cursors["playlist"] || `no`);
+    if (cursors[cursorKey] && !loading) fetchSongs(cursors[cursorKey]);
   };
 
   const handleRemoveSong = async (songId, playListId) => {
@@ -76,8 +78,7 @@ const PlaylistSongs = () => {
   };
 
   return (
-  <div c
-  lassName={styles.page}>
+    <div c lassName={styles.page}>
       <section className={styles.hero}>
         <div
           className={styles.heroBg}

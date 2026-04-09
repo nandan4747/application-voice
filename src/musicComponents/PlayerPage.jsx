@@ -21,6 +21,7 @@ import CreatePlaylistModal from "../playlistComp/CreatePlaylistModal";
 import { useMusic } from "../MusicContext";
 import NavBar from "../navbarComp/Navbar";
 import MusicVisual from "../animations/MusicVisual";
+import { getRandomInt } from "../api/mechanism";
 
 const PlayerPage = () => {
   const { id } = useParams();
@@ -87,20 +88,30 @@ const PlayerPage = () => {
   /* ── Queue navigation ── */
   const handleNavigation = (direction) => {
     try {
-      const raw = localStorage.getItem("playersequence");
-      if (!raw) return;
+      const raw = localStorage.getItem("playersequence") || false;
+      // console.log("getting raw");
+      //console.log("raw value : ", raw);
+      if (!raw) {
+        return;
+      }
       const { track, currentIndex } = JSON.parse(raw);
+      if (!track) {
+        navigate(`/play/${getRandomInt(1, 90)}`, { replace: true });
+      }
       const queue = cache[track];
       if (!queue) return;
 
       const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
       if (next >= 0 && next < queue.length) {
+        console.log("exe");
         localStorage.setItem(
           "playersequence",
           JSON.stringify({ track, currentIndex: next }),
         );
-        navigate(`/play/${queue[next].id}`, { replace: true });
+        return navigate(`/play/${queue[next].id}`, { replace: true });
       }
+      // generating random int to play song randomly if there's no song left in the sequence
+      navigate(`/play/${getRandomInt(1, 90)}`, { replace: true });
     } catch (e) {
       console.error("Navigation error:", e);
     }

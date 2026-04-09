@@ -51,6 +51,8 @@ const SearchPage = () => {
                 key={song.id}
                 songId={song.id}
                 songName={song.title}
+                played={song.play_count}
+                likes={song.likes_count}
                 currentIndex={index}
               />
             ))
