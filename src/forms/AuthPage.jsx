@@ -167,6 +167,41 @@ const AuthPage = () => {
           </div>
         </div>
       </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke=" #df15fa"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-music2-icon lucide-music-2"
+        >
+          <circle cx="8" cy="18" r="4" />
+          <path d="M12 18V2l7 4" />
+        </svg>
+        <p
+          onClick={() => {
+            navigate("/", { replace: true });
+          }}
+          style={{
+            color: "white",
+            fontWeight: "800",
+            cursor: "pointer",
+          }}
+        >
+          Back to Vibe
+        </p>
+      </div>
     </div>
   );
 };

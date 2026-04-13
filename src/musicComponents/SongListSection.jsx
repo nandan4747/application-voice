@@ -49,7 +49,18 @@ const SongListSection = ({ title, apiUrl }) => {
 
       <div className={styles.listContainer}>
         {loading ? (
-          <p className={styles.statusText}>Tuning the instruments...</p>
+          <div className={styles.skeletonList}>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className={styles.skeletonItem}>
+                <div className={styles.skeletonIndex} />
+                <div className={styles.skeletonText}>
+                  <div className={styles.skeletonTitle} />
+                  <div className={styles.skeletonMeta} />
+                </div>
+                <div className={styles.skeletonStats} />
+              </div>
+            ))}
+          </div>
         ) : songs.length > 0 ? (
           songs.map((song, index) => (
             <SongListItem

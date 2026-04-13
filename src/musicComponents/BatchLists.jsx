@@ -1,6 +1,6 @@
 import { useMusic } from "../MusicContext";
 import { cursors } from "../api/cursors";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import SongListItem from "./SongListItem";
 import { useLocation } from "react-router-dom";
 import { Details } from "../api/HostDetails";
@@ -18,9 +18,13 @@ export const BatchLists = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(!!cursors[cursorKey]);
 
-  const fetchSongsBatch = async () => {
-    if (loading || !cursors[cursorKey]) return;
+  const sentinelRef = useRef(null);
+  const loadingRef = useRef(false);
 
+  const fetchSongsBatch = useCallback(async () => {
+    if (loadingRef.current || !cursors[cursorKey]) return;
+
+    loadingRef.current = true;
     setLoading(true);
     try {
       const res = await fetch(
@@ -30,10 +34,12 @@ export const BatchLists = () => {
 
       const data = await res.json();
       const newTracks = data.songs || [];
-      const updatedList = [...songs, ...newTracks];
 
-      setSongs(updatedList);
-      setCacheData(apiUrl, updatedList);
+      setSongs((prev) => {
+        const updated = [...prev, ...newTracks];
+        setCacheData(apiUrl, updated);
+        return updated;
+      });
 
       if (cursorKey) {
         cursors[cursorKey] = data.nextCursor || "";
@@ -42,15 +48,35 @@ export const BatchLists = () => {
     } catch (err) {
       console.error(err);
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
-  };
+  }, [apiUrl, cursorKey]);
 
+  // Initial load
   useEffect(() => {
     if (apiUrl && songs.length <= 10) {
       fetchSongsBatch();
     }
   }, [apiUrl]);
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingRef.current) {
+          fetchSongsBatch();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, fetchSongsBatch]);
 
   return (
     <div className={styles.page}>
@@ -83,33 +109,15 @@ export const BatchLists = () => {
           ))}
         </div>
 
+        {/* Sentinel — sits just below the list; triggers fetch when visible */}
+        <div ref={sentinelRef} style={{ height: 1 }} />
+
         {loading && (
           <div className={styles.loaderWrapper}>
             <SearchLoader />
           </div>
         )}
 
-        {hasMore && !loading && (
-          <div className={styles.loadMoreWrapper}>
-            <button
-              className={styles.loadMoreBtn}
-              onClick={fetchSongsBatch}
-              disabled={loading}
-            >
-              <span className={styles.loadMoreLabel}>Load More</span>
-              <svg
-                className={styles.loadMoreIcon}
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle cx="5" cy="12" r="1.5" fill="currentColor" />
-                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-                <circle cx="19" cy="12" r="1.5" fill="currentColor" />
-              </svg>
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

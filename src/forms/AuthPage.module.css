@@ -9,6 +9,7 @@
   background: #0e0e0e;
   font-family: "DM Sans", sans-serif;
   padding: 24px 16px;
+  flex-direction: column;
 }
 
 .authCard {

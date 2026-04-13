@@ -251,14 +251,17 @@ const UserDashboard = () => {
             {favorites.length > 0 ? (
               <div className={styles.songList}>
                 {favorites.map((song, i) => (
-                  <div key={song.id} className={styles.songRow}>
+                  <div
+                    key={song.id}
+                    className={styles.songRow}
+                    onClick={() => {
+                      nav(`/play/${song.id}`);
+                    }}
+                  >
                     <span className={styles.songIndex}>{i + 1}</span>
                     <Heart size={14} fill="#ef4444" color="#ef4444" />
                     <div className={styles.songInfo}>
                       <p className={styles.songName}>{song.title}</p>
-                      <p className={styles.artistName}>
-                        {song.creator_name || "Unknown Artist"}
-                      </p>
                     </div>
                   </div>
                 ))}

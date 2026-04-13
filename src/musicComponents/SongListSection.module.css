@@ -7,11 +7,12 @@
 
 .sectionTitle {
   color: #cc15fa; /* That gold accent you like */
-  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: 1rem;
   margin-bottom: 20px;
   border-left: 4px solid #cc15fa;
   padding-left: 15px;
+ 
 }
 
 .listContainer {
@@ -25,4 +26,76 @@
   text-align: center;
   padding: 40px;
   font-style: italic;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeletonItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(204, 21, 250, 0.08);
+}
+
+.skeletonIndex {
+  width: 20px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.skeletonText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeletonTitle {
+  height: 14px;
+  width: 55%;
+  border-radius: 4px;
+}
+
+.skeletonMeta {
+  height: 11px;
+  width: 30%;
+  border-radius: 4px;
+}
+
+.skeletonStats {
+  width: 60px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.skeletonIndex,
+.skeletonTitle,
+.skeletonMeta,
+.skeletonStats {
+  background: linear-gradient(
+    90deg,
+    rgba(204, 21, 250, 0.08) 25%,
+    rgba(204, 21, 250, 0.18) 50%,
+    rgba(204, 21, 250, 0.08) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
 }
