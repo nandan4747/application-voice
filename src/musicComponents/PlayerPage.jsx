@@ -201,30 +201,47 @@ const PlayerPage = () => {
         <div className={styles.infoSection}>
           <div className={styles.details}>
             <h2>{song.title}</h2>
-            <p>{song.creator_name}</p>
+            <p
+              style={{
+                alignSelf: "center",
+                textAlign:"center"
+              }}
+            >
+              {song.creator_name}
+            </p>
           </div>
 
-          {/* Like */}
-          <button
-            className={`${styles.actionBtn} ${isLiked ? styles.actionBtnLiked : ""}`}
-            onClick={handleLikeClick}
-            aria-label={isLiked ? "Unlike" : "Like"}
-          >
-            <Heart
-              size={18}
-              fill={isLiked ? "currentColor" : "none"}
-              strokeWidth={1.8}
-            />
-          </button>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row-reverse",
 
-          {/* Add to playlist */}
-          <button
-            className={styles.actionBtn}
-            onClick={() => setIsPlaylistOpen(true)}
-            aria-label="Add to playlist"
+              width: "100%",
+              justifyContent: "space-between",
+            }}
           >
-            <ListPlus size={18} strokeWidth={1.8} />
-          </button>
+            {/* Like */}
+            <button
+              className={`${styles.actionBtn} ${isLiked ? styles.actionBtnLiked : ""}`}
+              onClick={handleLikeClick}
+              aria-label={isLiked ? "Unlike" : "Like"}
+            >
+              <Heart
+                size={18}
+                fill={isLiked ? "currentColor" : "none"}
+                strokeWidth={1.8}
+              />
+            </button>
+
+            {/* Add to playlist */}
+            <button
+              className={styles.actionBtn}
+              onClick={() => setIsPlaylistOpen(true)}
+              aria-label="Add to playlist"
+            >
+              <ListPlus size={18} strokeWidth={1.8} />
+            </button>
+          </div>
         </div>
 
         {/* Controls */}
