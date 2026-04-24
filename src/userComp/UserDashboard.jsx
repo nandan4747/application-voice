@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { handleDeleteAccount } from "../api/authFunctions";
 import CreatePlaylistModal from "../playlistComp/CreatePlaylistModal";
 import { Plus } from "lucide-react";
@@ -71,12 +71,18 @@ const UserDashboard = () => {
     role: "",
   });
   const [playlists, setPlaylists] = useState([]);
-  const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreator, setIsCreator] = useState(false);
   const [activeGenre, setActiveGenre] = useState(
     () => localStorage.getItem("genre") || "",
   );
+
+  const [favorites, setFavorites] = useState([]);
+  const [likedCursor, setLikedCursor] = useState(null);
+  const [hasMoreLiked, setHasMoreLiked] = useState(true);
+  const [loadingMoreLiked, setLoadingMoreLiked] = useState(false);
+  const likedSentinelRef = useRef(null); // add useRef to imports
+
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -103,10 +109,14 @@ const UserDashboard = () => {
           const u = await userRes.json();
           setUserData(u);
           if (u.role === "creator") setIsCreator(true);
+        } else {
+          return nav("/auth");
         }
         if (likedRes.ok) {
           const l = await likedRes.json();
           setFavorites(l.songs || []);
+          setLikedCursor(l.nextCursor || null);
+          setHasMoreLiked(!!l.nextCursor);
         }
         if (playRes.ok) {
           const p = await playRes.json();
@@ -121,6 +131,44 @@ const UserDashboard = () => {
 
     fetchDashboardData();
   }, []);
+
+  const loadMoreLiked = useCallback(async () => {
+    if (loadingMoreLiked || !hasMoreLiked || !likedCursor) return;
+
+    setLoadingMoreLiked(true);
+    const token = localStorage.getItem("token");
+
+    const url = new URL(`${Details.domain}user/songs/liked`);
+    url.searchParams.set("cursor", likedCursor);
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      setFavorites((prev) => [...prev, ...(data.songs || [])]);
+      setLikedCursor(data.nextCursor || null);
+      setHasMoreLiked(!!data.nextCursor);
+    }
+
+    setLoadingMoreLiked(false);
+  }, [loadingMoreLiked, hasMoreLiked, likedCursor]);
+
+  useEffect(() => {
+    if (activeTab !== "favorites") return;
+    const sentinel = likedSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMoreLiked();
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [activeTab, loadMoreLiked]);
 
   const showToast = (message, type = "success") =>
     setToast({ show: true, message, type });
@@ -249,23 +297,38 @@ const UserDashboard = () => {
               <h2 className={styles.sectionTitle}>Liked Songs</h2>
             </div>
             {favorites.length > 0 ? (
-              <div className={styles.songList}>
-                {favorites.map((song, i) => (
-                  <div
-                    key={song.id}
-                    className={styles.songRow}
-                    onClick={() => {
-                      nav(`/play/${song.id}`);
-                    }}
-                  >
-                    <span className={styles.songIndex}>{i + 1}</span>
-                    <Heart size={14} fill="#ef4444" color="#ef4444" />
-                    <div className={styles.songInfo}>
-                      <p className={styles.songName}>{song.title}</p>
+              <>
+                <div className={styles.songList}>
+                  {favorites.map((song, i) => (
+                    <div
+                      key={song.id}
+                      className={styles.songRow}
+                      onClick={() => nav(`/play/${song.id}`)}
+                    >
+                      <span className={styles.songIndex}>{i + 1}</span>
+                      <Heart size={14} fill="#ef4444" color="#ef4444" />
+                      <div className={styles.songInfo}>
+                        <p className={styles.songName}>{song.title}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+
+                {/* Sentinel */}
+                <div ref={likedSentinelRef} style={{ height: 1 }} />
+
+                {loadingMoreLiked && (
+                  <p className={styles.emptySubtitle}>Loading more...</p>
+                )}
+                {!hasMoreLiked && (
+                  <p
+                    className={styles.emptySubtitle}
+                    style={{ textAlign: "center", marginTop: "1rem" }}
+                  >
+                    You've liked {favorites.length} songs 🎵
+                  </p>
+                )}
+              </>
             ) : (
               <Empty
                 icon={<Heart size={22} />}

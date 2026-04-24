@@ -1,19 +1,26 @@
 /* eslint-disable no-unused-vars */
 import { Details } from "./HostDetails";
 
-export const getCreatorSongs = async (creatorId) => {
+export const getCreatorSongs = async (creatorId, cursor = null) => {
   try {
-    const response = await fetch(
-      `${Details.domain}user/songs/creator/${creatorId}`,
+    const url = new URL(`${Details.domain}user/songs/creator`);
+    url.searchParams.set("id", creatorId);
+    if (cursor) url.searchParams.set("cursor", cursor);
 
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+    const response = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-    );
+    });
+
     const data = await response.json();
-    if (response.ok) return { success: true, songs: data.songs };
+    if (response.ok)
+      return {
+        success: true,
+        songs: data.songs,
+        nextCursor: data.nextCursor || null,
+      };
+
     return {
       success: false,
       error: data.dbError || "Failed to fetch your hits",
@@ -30,7 +37,6 @@ export const uploadSongTrack = async (formData) => {
     const response = await fetch(`${Details.domain}creator/v1/auth/upload`, {
       method: "POST",
       headers: {
-       
         Authorization: `Bearer ${token}`,
       },
       body: formData,

@@ -1,31 +1,71 @@
-import React, { useEffect, useState } from "react";
+// CreatorDashboard.jsx
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { getCreatorSongs } from "../api/creatorFunctions";
 import AnalysisCard from "./AnalysisCard";
 import styles from "./CreatorDashboard.module.css";
-import { BarChart3, TrendingUp, Plus } from "lucide-react"; // Added Plus icon
+import { BarChart3, TrendingUp, Plus } from "lucide-react";
 import UploadModal from "./UploadModal";
 
 const CreatorDashboard = () => {
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const sentinelRef = useRef(null);
+
   const handleUploadSuccess = (newSong) => {
-  
     setSongs((prev) => [newSong, ...prev]);
   };
 
+  // Initial load
   useEffect(() => {
     const loadDashboard = async () => {
       if (user?.id) {
         const res = await getCreatorSongs(user.id);
-        if (res.success) setSongs(res.songs);
+        if (res.success) {
+          setSongs(res.songs);
+          setCursor(res.nextCursor || null);
+          setHasMore(!!res.nextCursor);
+        }
       }
       setLoading(false);
     };
     loadDashboard();
   }, []);
+
+  // Load next page
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || !cursor) return;
+
+    setLoadingMore(true);
+    const res = await getCreatorSongs(user.id, cursor);
+    if (res.success) {
+      setSongs((prev) => [...prev, ...res.songs]);
+      setCursor(res.nextCursor || null);
+      setHasMore(!!res.nextCursor);
+    }
+    setLoadingMore(false);
+  }, [loadingMore, hasMore, cursor, user?.id]);
+
+  // IntersectionObserver on sentinel
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMore();
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]); // re-bind when loadMore changes (cursor/hasMore update)
 
   const totalPlays = songs.reduce((acc, s) => acc + s.play_count, 0);
   const totalLikes = songs.reduce((acc, s) => acc + s.likes_count, 0);
@@ -40,8 +80,6 @@ const CreatorDashboard = () => {
           <h1>Captain's Log: {user?.username}</h1>
           <p>Real-time performance of your studio</p>
         </div>
-
-        {/* FIX 1: The Trigger Button */}
         <button className={styles.goldBtn} onClick={() => setIsModalOpen(true)}>
           <Plus size={20} /> Upload Track
         </button>
@@ -77,6 +115,20 @@ const CreatorDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Sentinel — watched by IntersectionObserver */}
+      <div ref={sentinelRef} style={{ height: 1 }} />
+
+      {loadingMore && (
+        <div className={styles.loading}>Loading more tracks...</div>
+      )}
+
+      {!hasMore && songs.length > 0 && (
+        <div className={styles.empty} style={{ marginTop: "1rem" }}>
+          You've reached the end of your catalog 
+        </div>
+      )}
+
       <UploadModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
