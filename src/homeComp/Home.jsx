@@ -49,10 +49,10 @@ const Home = () => {
         }
 
         {
-          //most played songs by genre
+          //new songs by genre
           <SongListSection
             apiUrl={`user/songs/recent/genre?genre=${genre}`}
-            title={`Most played Songs according to your teast`}
+            title={`New Releases that you may like`}
           />
         }
         {
