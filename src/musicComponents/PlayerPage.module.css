@@ -118,7 +118,6 @@
 .details {
   flex: 1;
   min-width: 0;
-  text-align: left;
 }
 
 .details h2 {
@@ -128,8 +127,7 @@
   letter-spacing: -0.02em;
   color: var(--text-primary);
   margin: 0 0 4px;
-  white-space: nowrap;
-  overflow: hidden;
+  white-space: wrap;
   text-overflow: ellipsis;
 }
 
