@@ -60,7 +60,7 @@ const SearchPage = () => {
   // ─── Load next page ──────────────────────────────────────────────────────
   // Stable ref so the observer never needs to reconnect
   const loadMore = useRef(async () => {
-    console.log("loading more");
+    
     if (loadingMoreRef.current || !hasMoreRef.current || !nextCursorRef.current)
       return;
 

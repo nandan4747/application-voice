@@ -77,7 +77,7 @@ export const fetchMoreByTags = async (tags, cursor) => {
     const tagsParam = encodeURIComponent(tags.join(" "));
     const cursorParam = encodeURIComponent(cursor);
     const response = await fetch(
-      `${Details.domain}user/tag?tags=${tagsParam}&nextCursor=${cursorParam}`
+      `${Details.domain}user/related?tags=${tagsParam}&nextCursor=${cursorParam}`
     );
     const data = await response.json();
     if (response.ok) return { success: true, results: data.results, nextCursor: data.nextCursor };
