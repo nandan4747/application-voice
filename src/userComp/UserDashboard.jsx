@@ -37,6 +37,7 @@ const GENRES = [
   "sad",
   "epic",
   "melody",
+  "phonk",
 ];
 
 /* ── Skeleton loader ── */

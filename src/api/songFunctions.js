@@ -71,3 +71,18 @@ export const searchSongs = async (query) => {
     return { success: false, error: "Search failed" };
   }
 };
+// songFunctions.js
+export const fetchMoreByTags = async (tags, cursor) => {
+  try {
+    const tagsParam = encodeURIComponent(tags.join(" "));
+    const cursorParam = encodeURIComponent(cursor);
+    const response = await fetch(
+      `${Details.domain}user/tag?tags=${tagsParam}&nextCursor=${cursorParam}`
+    );
+    const data = await response.json();
+    if (response.ok) return { success: true, results: data.results, nextCursor: data.nextCursor };
+    return { success: false };
+  } catch {
+    return { success: false };
+  }
+};
