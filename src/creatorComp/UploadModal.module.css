@@ -119,6 +119,18 @@
 .spin {
   animation: spin 1s linear infinite;
 }
+
+.tagSection{
+  background-color: #09090b;
+  border:solid #242428 1px;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 100%;
+  min-height: 90px;
+  max-height: 100px;
+  color: white;
+  padding: 3%;
+}
 @keyframes spin {
   from {
     transform: rotate(0deg);

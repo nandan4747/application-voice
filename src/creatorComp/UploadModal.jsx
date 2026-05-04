@@ -6,6 +6,7 @@ import styles from "./UploadModal.module.css";
 const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
   const [songName, setSongName] = useState("");
   const [genre, setGenre] = useState("pop");
+  const [tags, setTags] = useState("");
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +33,7 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     formData.append("songName", songName);
     formData.append("genre", genre);
     formData.append("songFile", file);
+    formData.append("tags", tags);
 
     const result = await uploadSongTrack(formData);
 
@@ -84,6 +86,16 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
             </select>
           </div>
 
+          <textarea
+            name=""
+            id=""
+            placeholder="#tags"
+            className={styles.tagSection}
+            onChange={(e) => {
+              setTags(e.target.value);
+              //console.log(tags);
+            }}
+          ></textarea>
           <div
             className={`${styles.dropZone} ${file ? styles.hasFile : ""}`}
             onClick={() => fileInputRef.current.click()}
@@ -95,6 +107,7 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
               accept="audio/*"
               onChange={handleFileChange}
             />
+
             {file ? (
               <div className={styles.fileDetail}>
                 <CheckCircle2 color="#1db954" />

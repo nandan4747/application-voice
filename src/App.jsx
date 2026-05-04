@@ -8,10 +8,8 @@ import CreatorDashboard from "./creatorComp/CreatorDashboard";
 import UploadModal from "./creatorComp/UploadModal";
 import SearchPage from "./homeComp/SearchPage";
 import { MusicProvider } from "./MusicContext";
-
 import UserDashboard from "./userComp/UserDashboard";
 import PlaylistSongs from "./playlistComp/PlaylistSongs";
-
 import { BatchLists } from "./musicComponents/BatchLists";
 
 function App() {
