@@ -304,6 +304,23 @@
   justify-content: center;
 }
 
+.loop_btn {
+  background-color: rgba(128, 128, 128, 0.152);
+  border: solid rgba(241, 241, 241, 0.085) 0.5px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.421);
+  cursor: pointer;
+}
+.loop_btn svg {
+  height: 50%;
+}
+.loop_btn :hover{
+  color: white;
+
+}
 /* ── Mobile ── */
 @media (max-width: 480px) {
   .imageContainer {

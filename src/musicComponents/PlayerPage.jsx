@@ -36,6 +36,7 @@ const PlayerPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
+  const [playInLoop, setPlayInLoop] = useState(false);
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -103,7 +104,7 @@ const PlayerPage = () => {
 
       const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
       if (next >= 0 && next < queue.length) {
-        console.log("exe");
+        //console.log("exe");
         localStorage.setItem(
           "playersequence",
           JSON.stringify({ track, currentIndex: next }),
@@ -174,7 +175,14 @@ const PlayerPage = () => {
             /* autoplay blocked — user can press play */
           }
         }}
-        onEnded={() => handleNavigation("next")}
+        onEnded={() => {
+          if (playInLoop) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play();
+            return;
+          }
+          handleNavigation("next");
+        }}
       />
 
       <div className={styles.playerContent}>
@@ -204,7 +212,7 @@ const PlayerPage = () => {
             <p
               style={{
                 alignSelf: "center",
-                textAlign:"center"
+                textAlign: "center",
               }}
             >
               {song.creator_name}
@@ -214,12 +222,22 @@ const PlayerPage = () => {
           <div
             style={{
               display: "flex",
-              flexDirection: "row-reverse",
+              flexDirection: "row",
 
               width: "100%",
               justifyContent: "space-between",
             }}
           >
+
+            {/* Add to playlist */}
+            <button
+              className={styles.actionBtn}
+              onClick={() => setIsPlaylistOpen(true)}
+              aria-label="Add to playlist"
+            >
+              <ListPlus size={18} strokeWidth={1.8} />
+            </button>
+            
             {/* Like */}
             <button
               className={`${styles.actionBtn} ${isLiked ? styles.actionBtnLiked : ""}`}
@@ -233,13 +251,56 @@ const PlayerPage = () => {
               />
             </button>
 
-            {/* Add to playlist */}
+            {/* loop button  */}
             <button
-              className={styles.actionBtn}
-              onClick={() => setIsPlaylistOpen(true)}
-              aria-label="Add to playlist"
+              type="button"
+              className={styles.loop_btn}
+              onClick={() => {
+                setPlayInLoop(!playInLoop);
+              }}
             >
-              <ListPlus size={18} strokeWidth={1.8} />
+              {playInLoop && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-repeat-icon lucide-repeat"
+                >
+                  <path d="m17 2 4 4-4 4" />
+                  <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
+                  <path d="m7 22-4-4 4-4" />
+                  <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+                </svg>
+              )}
+
+              {!playInLoop && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-repeat-off-icon lucide-repeat-off"
+                >
+                  <path d="M11.656 6H21l-4-4" />
+                  <path d="M17.898 17.898A4 4 0 0 1 17 18H3l4-4" />
+                  <path d="m2 2 20 20" />
+                  <path d="M21 13v1a4 4 0 0 1-.171 1.159" />
+                  <path d="m21 6-4 4" />
+                  <path d="M3 11v-1a4 4 0 0 1 3.102-3.898" />
+                  <path d="m7 22-4-4" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
