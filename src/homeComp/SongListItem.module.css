@@ -2,6 +2,14 @@
   min-height: 100vh;
   background-color: #0d0d0d;
   color: white;
+  
+}
+.cancelBtn{
+  right: 10px;
+  position: absolute;
+  margin-top: 90px;
+  color: rgb(210, 210, 210);
+  cursor: pointer;
 }
 
 .navbarWrapper {

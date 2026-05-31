@@ -9,7 +9,7 @@ const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
   const inputRef = useRef(null);
   const navigate = useNavigate();
-
+  const searchTimerRef = useRef(null);
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -18,18 +18,44 @@ const NavBar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleInputChange = (e) => {
+    const newValue = e.target.value;
+    setSearchTerm(newValue); 
+
+    const trimmedValue = newValue.trim(); 
+
+    // Reset the debounce timer
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+
+    if (trimmedValue.length > 0) {
+      searchTimerRef.current = setTimeout(() => {
+        navigate(`/search?q=${trimmedValue}`);
+        console.log("searching after 3s of silence");
+      }, 2500);
+    }
+  };
+
   const handleKeyDown = (e) => {
+    setSearchTerm(e.target.value);
+    const trimmedValue = searchTerm.trim();
+   // console.log(`searched term : ${trimmedValue}`);
+
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+
     if (e.key === "Enter") {
-      const trimmedValue = searchTerm.trim();
       if (trimmedValue.length > 0) {
         navigate(`/search?q=${trimmedValue}`);
       } else {
         navigate("/");
       }
-      // collapse on mobile after search
       setMobileSearchActive(false);
       inputRef.current?.blur();
     }
+
     if (e.key === "Escape") {
       setMobileSearchActive(false);
       inputRef.current?.blur();
@@ -52,14 +78,18 @@ const NavBar = () => {
   };
 
   return (
-    <div className={`${Styles.main} ${mobileSearchActive ? Styles.searchExpanded : ""} ${scrolled ? Styles.scrolled : ""}`}>
+    <div
+      className={`${Styles.main} ${mobileSearchActive ? Styles.searchExpanded : ""} ${scrolled ? Styles.scrolled : ""}`}
+    >
       {/* Logo — hidden on mobile when search is active */}
       <div
         className={`${Styles.logo_section} ${mobileSearchActive ? Styles.hidden : ""}`}
         onClick={() => navigate("/")}
         style={{ cursor: "pointer" }}
       >
-        <div style={{ display: "flex", alignItems: "center", marginLeft: "3%" }}>
+        <div
+          style={{ display: "flex", alignItems: "center", marginLeft: "3%" }}
+        >
           <div className={Styles.logo_container}>
             <img src={logo} alt="logo" />
           </div>
@@ -68,13 +98,15 @@ const NavBar = () => {
       </div>
 
       {/* Search bar */}
-      <div className={`${Styles.searchbar} ${mobileSearchActive ? Styles.searchbarExpanded : ""}`}>
+      <div
+        className={`${Styles.searchbar} ${mobileSearchActive ? Styles.searchbarExpanded : ""}`}
+      >
         <input
           ref={inputRef}
           type="text"
           placeholder="Search for tracks"
+          onChange={handleInputChange}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={handleBlur}

@@ -5,6 +5,7 @@ import SongListItem from "../musicComponents/SongListItem";
 import styles from "./SongListItem.module.css";
 import NavBar from "../navbarComp/Navbar";
 import SearchLoader from "../animations/SearchLoader";
+import { useNavigate } from "react-router-dom";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
@@ -19,6 +20,7 @@ const SearchPage = () => {
   const hasMoreRef = useRef(false);
   const loadingMoreRef = useRef(false); // ← replaces loadingMore in the guard
   const sentinelRef = useRef(null);
+  const nav = useNavigate();
 
   // ─── Initial search ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -47,7 +49,7 @@ const SearchPage = () => {
             : query.trim().toLowerCase().split(/\s+/);
 
         nextCursorRef.current = meta?.nextCursor ?? null;
-        console.log(nextCursorRef.current);
+        // console.log(nextCursorRef.current);
         hasMoreRef.current = !!meta?.nextCursor;
       }
 
@@ -60,7 +62,6 @@ const SearchPage = () => {
   // ─── Load next page ──────────────────────────────────────────────────────
   // Stable ref so the observer never needs to reconnect
   const loadMore = useRef(async () => {
-    
     if (loadingMoreRef.current || !hasMoreRef.current || !nextCursorRef.current)
       return;
 
@@ -100,6 +101,29 @@ const SearchPage = () => {
     <div className={styles.page}>
       <div className={styles.navbarWrapper}>
         <NavBar />
+      </div>
+
+      <div
+        className={styles.cancelBtn}
+        onClick={() => {
+          nav(`/`, { replace: true });
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-undo2-icon lucide-undo-2"
+        >
+          <path d="M9 14 4 9l5-5" />
+          <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" />
+        </svg>
       </div>
 
       <div className={styles.content}>

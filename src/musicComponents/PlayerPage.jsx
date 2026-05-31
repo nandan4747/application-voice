@@ -259,7 +259,7 @@ const PlayerPage = () => {
                 setPlayInLoop(!playInLoop);
               }}
             >
-              {playInLoop && (
+              {!playInLoop && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -279,7 +279,7 @@ const PlayerPage = () => {
                 </svg>
               )}
 
-              {!playInLoop && (
+              {playInLoop && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
