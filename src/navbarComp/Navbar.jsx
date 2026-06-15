@@ -32,8 +32,8 @@ const NavBar = () => {
     if (trimmedValue.length > 0) {
       searchTimerRef.current = setTimeout(() => {
         navigate(`/search?q=${trimmedValue}`);
-        console.log("searching after 3s of silence");
-      }, 2500);
+        //console.log("searching after 3s of silence");
+      }, 1500);
     }
   };
 

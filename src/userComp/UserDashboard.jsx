@@ -51,7 +51,10 @@ const fetchUser = async () => {
   const res = await fetch(`${Details.domain}user/details`, {
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error("Unauthorized");
+  if (!res.ok) {
+    
+    throw new Error("Unauthorized");
+  }
   return res.json();
 };
 
@@ -118,14 +121,19 @@ const UserDashboard = () => {
   const token = localStorage.getItem("token");
 
   /* ── Queries ── */
-  const userQuery = useQuery({
-    queryKey: ["user"],
-    queryFn: fetchUser,
-    staleTime: STALE_5MIN,
-    retry: false,
-    onError: () => nav("/auth"),
-  });
+const userQuery = useQuery({
+  queryKey: ["user"],
+  queryFn: fetchUser,
+  staleTime: STALE_5MIN,
+  retry: false,
+});
 
+useEffect(() => {
+  if (userQuery.isError) {
+   
+    nav("/auth");
+  }
+}, [userQuery.isError]);
   // Replace the likedQuery block and the cursor useEffect
 
   const likedQuery = useQuery({
@@ -389,9 +397,7 @@ const UserDashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      <div>
-       
-      </div>
+      <div></div>
       <nav className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <h3>Dashboard</h3>

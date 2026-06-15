@@ -10,6 +10,16 @@
   top: 0;
   z-index: 999;
 }
+.player_overlay {
+  position: fixed;
+  z-index: 100;
+  bottom: 0;
+  left: 0;
+  width: 100%;   
+  min-height: 0;     
+  
+}
+
 .contents {
   height: 100%;
   width: 100%;
@@ -32,11 +42,11 @@
 .genre_holder {
   display: flex;
   flex-direction: row;
-  
+
   justify-content: center;
   width: 90vw;
   justify-self: center;
-  
+
   border-radius: 24px;
 }
 

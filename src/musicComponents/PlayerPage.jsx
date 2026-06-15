@@ -43,6 +43,8 @@ const PlayerPage = () => {
     type: "success",
   });
 
+  const [isMinimized, setMinimized] = useState(false);
+
   const showToast = (msg, type = "success") =>
     setToast({ show: true, message: msg, type });
   const closeToast = useCallback(
@@ -112,7 +114,7 @@ const PlayerPage = () => {
         return navigate(`/play/${queue[next].id}`, { replace: true });
       }
       // generating random int to play song randomly if there's no song left in the sequence
-      navigate(`/play/${getRandomInt(1, 90)}`, { replace: true });
+      navigate(`/play/${getRandomInt(1, 100)}`, { replace: true });
     } catch (e) {
       console.error("Navigation error:", e);
     }
@@ -141,25 +143,56 @@ const PlayerPage = () => {
   const artUrl = `https://picsum.photos/seed/${song.id}/400`;
 
   return (
-    <div className={styles.fullPlayerContainer}>
+    <div
+      className={isMinimized ? styles.miniPlayer : styles.fullPlayerContainer}
+    >
+      { !isMinimized &&
+        <div
+          className={styles.back_btn}
+          onClick={() => {
+            setMinimized(!isMinimized);
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-minimize2-icon lucide-minimize-2"
+          >
+            <path d="m14 10 7-7" />
+            <path d="M20 10h-6V4" />
+            <path d="m3 21 7-7" />
+            <path d="M4 14h6v6" />
+          </svg>
+        </div>
+      }
+
       {/* Ambient background bloom */}
+
       <div
         className={styles.ambientBg}
         style={{ backgroundImage: `url(${artUrl})` }}
       />
 
-      {/* Fixed navbar */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          zIndex: 100,
-        }}
-      >
-        <NavBar />
-      </div>
+      {/* Fixed navbar 
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            zIndex: 100,
+          }}
+        >
+          <NavBar />
+        </div>
+        */}
 
       {/* Hidden audio element */}
       <audio
@@ -185,11 +218,17 @@ const PlayerPage = () => {
         }}
       />
 
-      <div className={styles.playerContent}>
+      <div
+        className={
+          isMinimized ? styles.playerContent_mini : styles.playerContent
+        }
+      >
         {/* Visualiser */}
-        <div className={styles.topSection}>
-          <MusicVisual isPlaying={isPlaying} />
-        </div>
+        {!isMinimized && (
+          <div className={styles.topSection}>
+            <MusicVisual isPlaying={isPlaying} />
+          </div>
+        )}
 
         {/* Album art */}
         <div className={styles.imageContainer}>
@@ -198,6 +237,7 @@ const PlayerPage = () => {
             alt={song.title}
             className={styles.albumArt}
             draggable={false}
+            onClick={() => setMinimized(false)}
           />
           <div
             className={styles.imageGlow}
@@ -210,152 +250,161 @@ const PlayerPage = () => {
           <div className={styles.details}>
             <h2>{song.title}</h2>
             <p
-              style={{
-                alignSelf: "center",
-                textAlign: "center",
-              }}
+              style={
+                isMinimized
+                  ? {
+                      alignSelf: "start",
+                      textAlign: "start",
+                    }
+                  : {
+                      alignSelf: "center",
+                      textAlign: "center",
+                    }
+              }
             >
               {song.creator_name}
             </p>
           </div>
+          {!isMinimized && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-
-              width: "100%",
-              justifyContent: "space-between",
-            }}
-          >
-
-            {/* Add to playlist */}
-            <button
-              className={styles.actionBtn}
-              onClick={() => setIsPlaylistOpen(true)}
-              aria-label="Add to playlist"
-            >
-              <ListPlus size={18} strokeWidth={1.8} />
-            </button>
-            
-            {/* Like */}
-            <button
-              className={`${styles.actionBtn} ${isLiked ? styles.actionBtnLiked : ""}`}
-              onClick={handleLikeClick}
-              aria-label={isLiked ? "Unlike" : "Like"}
-            >
-              <Heart
-                size={18}
-                fill={isLiked ? "currentColor" : "none"}
-                strokeWidth={1.8}
-              />
-            </button>
-
-            {/* loop button  */}
-            <button
-              type="button"
-              className={styles.loop_btn}
-              onClick={() => {
-                setPlayInLoop(!playInLoop);
+                width: "100%",
+                justifyContent: "space-between",
               }}
             >
-              {!playInLoop && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="lucide lucide-repeat-icon lucide-repeat"
-                >
-                  <path d="m17 2 4 4-4 4" />
-                  <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
-                  <path d="m7 22-4-4 4-4" />
-                  <path d="M21 13v1a4 4 0 0 1-4 4H3" />
-                </svg>
-              )}
+              {/* Add to playlist */}
+              <button
+                className={styles.actionBtn}
+                onClick={() => setIsPlaylistOpen(true)}
+                aria-label="Add to playlist"
+              >
+                <ListPlus size={18} strokeWidth={1.8} />
+              </button>
 
-              {playInLoop && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="lucide lucide-repeat-off-icon lucide-repeat-off"
-                >
-                  <path d="M11.656 6H21l-4-4" />
-                  <path d="M17.898 17.898A4 4 0 0 1 17 18H3l4-4" />
-                  <path d="m2 2 20 20" />
-                  <path d="M21 13v1a4 4 0 0 1-.171 1.159" />
-                  <path d="m21 6-4 4" />
-                  <path d="M3 11v-1a4 4 0 0 1 3.102-3.898" />
-                  <path d="m7 22-4-4" />
-                </svg>
-              )}
-            </button>
-          </div>
+              {/* Like */}
+              <button
+                className={`${styles.actionBtn} ${isLiked ? styles.actionBtnLiked : ""}`}
+                onClick={handleLikeClick}
+                aria-label={isLiked ? "Unlike" : "Like"}
+              >
+                <Heart
+                  size={18}
+                  fill={isLiked ? "currentColor" : "none"}
+                  strokeWidth={1.8}
+                />
+              </button>
+
+              {/* loop button  */}
+              <button
+                type="button"
+                className={styles.loop_btn}
+                onClick={() => {
+                  setPlayInLoop(!playInLoop);
+                }}
+              >
+                {!playInLoop && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-repeat-icon lucide-repeat"
+                  >
+                    <path d="m17 2 4 4-4 4" />
+                    <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
+                    <path d="m7 22-4-4 4-4" />
+                    <path d="M21 13v1a4 4 0 0 1-4 4H3" />
+                  </svg>
+                )}
+
+                {playInLoop && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-repeat-off-icon lucide-repeat-off"
+                  >
+                    <path d="M11.656 6H21l-4-4" />
+                    <path d="M17.898 17.898A4 4 0 0 1 17 18H3l4-4" />
+                    <path d="m2 2 20 20" />
+                    <path d="M21 13v1a4 4 0 0 1-.171 1.159" />
+                    <path d="m21 6-4 4" />
+                    <path d="M3 11v-1a4 4 0 0 1 3.102-3.898" />
+                    <path d="m7 22-4-4" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Controls */}
-        <div className={styles.controlsSection}>
-          <input
-            type="range"
-            className={styles.slider}
-            min="0"
-            max={duration || 0}
-            value={currentTime}
-            step="0.1"
-            onChange={handleSliderChange}
-          />
-          <div className={styles.timeInfo}>
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
+        {!isMinimized && (
+          <div className={styles.controlsSection}>
+            <input
+              type="range"
+              className={styles.slider}
+              min="0"
+              max={duration || 0}
+              value={currentTime}
+              step="0.1"
+              onChange={handleSliderChange}
+            />
+            <div className={styles.timeInfo}>
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+
+            <div className={styles.mainButtons}>
+              <button
+                className={styles.skipBtn}
+                onClick={() => handleNavigation("prev")}
+                aria-label="Previous"
+              >
+                <SkipBack size={28} fill="currentColor" />
+              </button>
+
+              <button
+                className={styles.playPauseBtn}
+                onClick={togglePlay}
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? (
+                  <Pause size={28} fill="black" color="black" />
+                ) : (
+                  <Play
+                    size={28}
+                    fill="black"
+                    color="black"
+                    style={{ marginLeft: 3 }}
+                  />
+                )}
+              </button>
+
+              <button
+                className={styles.skipBtn}
+                onClick={() => handleNavigation("next")}
+                aria-label="Next"
+              >
+                <SkipForward size={28} fill="currentColor" />
+              </button>
+            </div>
           </div>
-
-          <div className={styles.mainButtons}>
-            <button
-              className={styles.skipBtn}
-              onClick={() => handleNavigation("prev")}
-              aria-label="Previous"
-            >
-              <SkipBack size={28} fill="currentColor" />
-            </button>
-
-            <button
-              className={styles.playPauseBtn}
-              onClick={togglePlay}
-              aria-label={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? (
-                <Pause size={28} fill="black" color="black" />
-              ) : (
-                <Play
-                  size={28}
-                  fill="black"
-                  color="black"
-                  style={{ marginLeft: 3 }}
-                />
-              )}
-            </button>
-
-            <button
-              className={styles.skipBtn}
-              onClick={() => handleNavigation("next")}
-              aria-label="Next"
-            >
-              <SkipForward size={28} fill="currentColor" />
-            </button>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Modals */}

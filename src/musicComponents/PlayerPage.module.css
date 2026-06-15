@@ -14,7 +14,9 @@
 
 /* ── Page shell ── */
 .fullPlayerContainer {
+  bottom: 0;
   min-height: 100vh;
+  min-width: 100vw;
   background: var(--bg-base);
   display: flex;
   flex-direction: column;
@@ -25,6 +27,28 @@
   padding-bottom: 48px;
   position: relative;
   overflow: hidden;
+}
+
+/*mini bottom player*/
+.bottomContainer {
+  min-height: 5vh;
+  min-width: 100vw;
+  flex-direction: row;
+}
+.back_btn {
+  position: fixed;
+  cursor: pointer;
+  left:30px;
+  top: 90px;
+  z-index: 999;
+  color: rgb(151, 151, 151);
+  transition: all ease 0.6s;
+
+}
+
+.back_btn :hover{
+  transform: scale(1.06);
+  color: white;
 }
 
 /* ── Ambient background blur from album art ── */
@@ -317,9 +341,8 @@
 .loop_btn svg {
   height: 50%;
 }
-.loop_btn :hover{
+.loop_btn :hover {
   color: white;
-
 }
 /* ── Mobile ── */
 @media (max-width: 480px) {
@@ -331,4 +354,69 @@
   .playerContent {
     padding: 0 20px;
   }
+}
+
+/* mini player */
+
+/* Add this right above your other .miniPlayer child selectors */
+.miniPlayer {
+  width: 100vw;
+  height: 80px; /* The actual height of your minimized bar */
+  background: var(--bg-surface); /* Matches your dark theme */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-top: 1px solid var(--border-subtle);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.playerContent_mini {
+  display: flex;
+  flex-direction: row;
+  height: 68px;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 0 48px 0 16px; /* left padding for content, right for back btn */
+  overflow: hidden;
+}
+
+/* shrink album art in mini mode */
+.miniPlayer .imageContainer {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  margin-bottom: 0;
+}
+
+.miniPlayer .imageContainer .albumArt {
+  border-radius: 8px;
+}
+
+.miniPlayer .imageContainer .imageGlow {
+  display: none; /* no need for glow in mini */
+}
+
+/* shrink and left-align the text */
+.miniPlayer .infoSection {
+  flex-direction: row;
+  margin-bottom: 0;
+  gap: 4px;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.miniPlayer .details h2 {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.miniPlayer .details p {
+  font-size: 0.75rem;
 }

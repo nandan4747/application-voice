@@ -15,8 +15,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, 
-      gcTime: 10 * 60 * 1000, 
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
     },
   },
 });
@@ -25,8 +25,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <MusicProvider>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/play/:id" element={<PlayerPage />} />
+          <Route path="/" element={<Home />}>
+            <Route path="play/:id" element={<PlayerPage />} />
+          </Route>
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/creator/auth" element={<CreatorAuth />} />
           <Route path="/creator/dashboard" element={<CreatorDashboard />} />

@@ -3,6 +3,7 @@ import Styles from "./HomeStyle.module.css";
 import { relation } from "../api/relationalGenre";
 import SongGrid from "../musicComponents/SongGrid";
 import SongListSection from "../musicComponents/SongListSection";
+import { Outlet } from "react-router-dom";
 
 import { useState } from "react";
 const Home = () => {
@@ -13,8 +14,13 @@ const Home = () => {
   const relationalGenre = relation[genre];
   return (
     <div className={Styles.main}>
-      <div className={Styles.nav}>
-        <NavBar></NavBar>
+      {
+        <div className={Styles.nav}>
+          <NavBar></NavBar>
+        </div>
+      }
+      <div className={Styles.player_overlay}>
+        <Outlet />
       </div>
       <div className={Styles.contents}>
         {
