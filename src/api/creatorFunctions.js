@@ -49,3 +49,21 @@ export const uploadSongTrack = async (formData) => {
     return { success: false, error: "The connection to the studio is lost." };
   }
 };
+
+export const deleteSongTrack = async (songId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(
+      `${Details.domain}creator/v1/auth/song/${songId}`,
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } },
+    );
+    const responseMessage = await response.json();
+    if (response.ok) {
+      return { success: true, message: responseMessage.message };
+    }
+
+    return { success: false, message: responseMessage.message };
+  } catch (err) {
+    console.error("enable to delete song");
+  }
+};

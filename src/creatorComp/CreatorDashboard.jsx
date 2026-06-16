@@ -5,6 +5,7 @@ import AnalysisCard from "./AnalysisCard";
 import styles from "./CreatorDashboard.module.css";
 import { BarChart3, TrendingUp, Plus } from "lucide-react";
 import UploadModal from "./UploadModal";
+import Toast from "../NotificationComp/Toast";
 
 const CreatorDashboard = () => {
   const [songs, setSongs] = useState([]);
@@ -13,6 +14,9 @@ const CreatorDashboard = () => {
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [toast, setToast] = useState(null);
+  const showToast = (message, type) => setToast({ message, type });
 
   const user = JSON.parse(localStorage.getItem("user"));
   const sentinelRef = useRef(null);
@@ -108,7 +112,16 @@ const CreatorDashboard = () => {
 
       <div className={styles.songGrid}>
         {songs.length > 0 ? (
-          songs.map((song) => <AnalysisCard key={song.id} song={song} />)
+          songs.map((song) => (
+            <AnalysisCard
+              key={song.id}
+              song={song}
+              onToast={showToast}
+              onDeleted={(id) =>
+                setSongs((prev) => prev.filter((s) => s.id !== id))
+              }
+            />
+          ))
         ) : (
           <div className={styles.empty}>
             No tracks found. Time to drop a beat?
@@ -125,7 +138,7 @@ const CreatorDashboard = () => {
 
       {!hasMore && songs.length > 0 && (
         <div className={styles.empty} style={{ marginTop: "1rem" }}>
-          You've reached the end of your catalog 
+          You've reached the end of your catalog
         </div>
       )}
 
@@ -134,6 +147,14 @@ const CreatorDashboard = () => {
         onClose={() => setIsModalOpen(false)}
         onUploadSuccess={handleUploadSuccess}
       />
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

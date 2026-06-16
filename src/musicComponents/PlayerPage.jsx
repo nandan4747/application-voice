@@ -56,6 +56,12 @@ const PlayerPage = () => {
   useEffect(() => {
     const fetchSong = async () => {
       const res = await getSongDetails(id);
+
+      if (!res) {
+        //console.log("no song");
+        return navigate(`/play/${getRandomInt(1, 100)}`, { replace: true });
+      }
+
       if (res?.song) setSong(res.song);
     };
     fetchSong();
@@ -146,7 +152,7 @@ const PlayerPage = () => {
     <div
       className={isMinimized ? styles.miniPlayer : styles.fullPlayerContainer}
     >
-      { !isMinimized &&
+      {!isMinimized && (
         <div
           className={styles.back_btn}
           onClick={() => {
@@ -171,7 +177,7 @@ const PlayerPage = () => {
             <path d="M4 14h6v6" />
           </svg>
         </div>
-      }
+      )}
 
       {/* Ambient background bloom */}
 

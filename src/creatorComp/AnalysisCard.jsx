@@ -1,8 +1,13 @@
-import React from "react";
-import { Play, Heart, Calendar, Music2 } from "lucide-react";
+import React, { useState, useCallback } from "react";
+import { Play, Heart, Calendar, Music2, Trash2, Loader2 } from "lucide-react";
 import styles from "./AnalysisCard.module.css";
+import { deleteSongTrack } from "../api/creatorFunctions";
 
-const AnalysisCard = ({ song }) => {
+
+
+const AnalysisCard = ({ song, onDeleted, onToast }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-IN", {
       day: "numeric",
@@ -10,6 +15,24 @@ const AnalysisCard = ({ song }) => {
       year: "numeric",
     });
   };
+
+  const handleDelete = useCallback(async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      const result = await deleteSongTrack(song.id);
+      if (result?.success) {
+        onToast(result.message, "success");
+        onDeleted?.(song.id);
+      } else {
+        onToast(result?.message ?? "Something went wrong.", "error");
+      }
+    } catch {
+      onToast("Unable to delete song.", "error");
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [song.id, isDeleting, onDeleted]);
 
   return (
     <div className={styles.card}>
@@ -35,8 +58,23 @@ const AnalysisCard = ({ song }) => {
       </div>
 
       <div className={styles.footer}>
-        <Calendar size={14} />
-        <span>Released: {formatDate(song.created_at)}</span>
+        <div className={styles.footerLeft}>
+          <Calendar size={14} />
+          <span>Released: {formatDate(song.created_at)}</span>
+        </div>
+        <button
+          className={styles.deleteBtn}
+          onClick={handleDelete}
+          disabled={isDeleting}
+          aria-label="Delete song"
+        >
+          {isDeleting ? (
+            <Loader2 size={14} className={styles.spinner} />
+          ) : (
+            <Trash2 size={14} />
+          )}
+          {isDeleting ? "Deleting…" : "Delete"}
+        </button>
       </div>
     </div>
   );
