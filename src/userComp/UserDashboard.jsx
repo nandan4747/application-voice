@@ -20,6 +20,7 @@ import { Details } from "../api/HostDetails";
 import { useNavigate } from "react-router-dom";
 import Toast from "../NotificationComp/Toast";
 import { UpdatePasswordForm } from "../forms/UpdatePasswordFrom";
+import { useMusic } from "../MusicContext";
 
 const MENU_OPTIONS = [
   { id: "userInfo", label: "Profile", icon: <User size={17} /> },
@@ -52,7 +53,6 @@ const fetchUser = async () => {
     headers: authHeaders(),
   });
   if (!res.ok) {
-    
     throw new Error("Unauthorized");
   }
   return res.json();
@@ -99,6 +99,7 @@ const Empty = ({ icon, title, subtitle }) => (
 const UserDashboard = () => {
   const nav = useNavigate();
   const queryClient = useQueryClient();
+  const { playTrack } = useMusic();
 
   const [activeTab, setActiveTab] = useState("userInfo");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -121,19 +122,18 @@ const UserDashboard = () => {
   const token = localStorage.getItem("token");
 
   /* ── Queries ── */
-const userQuery = useQuery({
-  queryKey: ["user"],
-  queryFn: fetchUser,
-  staleTime: STALE_5MIN,
-  retry: false,
-});
+  const userQuery = useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser,
+    staleTime: STALE_5MIN,
+    retry: false,
+  });
 
-useEffect(() => {
-  if (userQuery.isError) {
-   
-    nav("/auth");
-  }
-}, [userQuery.isError]);
+  useEffect(() => {
+    if (userQuery.isError) {
+      nav("/auth");
+    }
+  }, [userQuery.isError]);
   // Replace the likedQuery block and the cursor useEffect
 
   const likedQuery = useQuery({
@@ -332,7 +332,7 @@ useEffect(() => {
                     <div
                       key={song.id}
                       className={styles.songRow}
-                      onClick={() => nav(`/play/${song.id}`)}
+                      onClick={() => playTrack(song.id)}
                     >
                       <span className={styles.songIndex}>{i + 1}</span>
                       <Heart size={14} fill="#ef4444" color="#ef4444" />

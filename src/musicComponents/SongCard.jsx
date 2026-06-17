@@ -1,7 +1,8 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+
 import { Play } from "lucide-react";
 import styles from "./SongCard.module.css";
+import { useMusic } from "../MusicContext";
 
 const SongCard = ({
   songName = "Unknown Track",
@@ -11,7 +12,8 @@ const SongCard = ({
   sequnceApiUrl,
   currentIndex,
 }) => {
-  const navigate = useNavigate();
+
+  const { playTrack } = useMusic();
   const imageUrl = `https://picsum.photos/seed/${songId}/300/300`;
 
   const handleClick = () => {
@@ -20,7 +22,8 @@ const SongCard = ({
       currentIndex: currentIndex,
     };
     localStorage.setItem("playersequence", JSON.stringify(sequenceObj));
-    navigate(`/play/${songId}`);
+    playTrack(songId);
+    //navigate(`/play/${songId}`);
   };
 
   return (
@@ -91,7 +94,6 @@ const SongCard = ({
         </div>
 
         <div className={styles.divider} />
-
       </div>
     </div>
   );

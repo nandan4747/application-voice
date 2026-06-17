@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+
 import {
   Heart,
   ListPlus,
@@ -22,11 +22,16 @@ import { useMusic } from "../MusicContext";
 import NavBar from "../navbarComp/Navbar";
 import MusicVisual from "../animations/MusicVisual";
 import { getRandomInt } from "../api/mechanism";
+import { Details } from "../api/HostDetails";
 
 const PlayerPage = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { cache } = useMusic();
+  const {
+    currentSongId,
+    isPlayerMinimized,
+    setIsPlayerMinimized,
+    cache,
+    playTrack,
+  } = useMusic();
   const audioRef = useRef(null);
 
   const [song, setSong] = useState(null);
@@ -43,7 +48,7 @@ const PlayerPage = () => {
     type: "success",
   });
 
-  const [isMinimized, setMinimized] = useState(false);
+  //const [isMinimized, setMinimized] = useState(false);
 
   const showToast = (msg, type = "success") =>
     setToast({ show: true, message: msg, type });
@@ -54,27 +59,36 @@ const PlayerPage = () => {
 
   /* ── Data fetching ── */
   useEffect(() => {
+    if (!currentSongId) return;
+
     const fetchSong = async () => {
-      const res = await getSongDetails(id);
+      const res = await await getSongDetails(currentSongId);
 
       if (!res) {
         //console.log("no song");
-        return navigate(`/play/${getRandomInt(1, 100)}`, { replace: true });
+        return playTrack(getRandomInt(1, 100));
       }
 
       if (res?.song) setSong(res.song);
     };
     fetchSong();
-  }, [id]);
+  }, [currentSongId]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!currentSongId) return;
+
     const checkFlag = async () => {
-      const res = await checkSongLikedFlag(id);
+      const res = await checkSongLikedFlag(currentSongId);
       setIsLiked(!!res?.alreadyLiked);
     };
     checkFlag();
-  }, [id]);
+  }, [currentSongId]);
+
+  if (!currentSongId) return null;
+
+  const handleMinimizeToggle = () => {
+    setIsPlayerMinimized(!isPlayerMinimized);
+  };
 
   /* ── Playback handlers ── */
   const togglePlay = () => {
@@ -98,29 +112,33 @@ const PlayerPage = () => {
   const handleNavigation = (direction) => {
     try {
       const raw = localStorage.getItem("playersequence") || false;
-      // console.log("getting raw");
-      //console.log("raw value : ", raw);
+
       if (!raw) {
         return;
       }
       const { track, currentIndex } = JSON.parse(raw);
       if (!track) {
-        navigate(`/play/${getRandomInt(1, 90)}`, { replace: true });
+        playTrack(getRandomInt(1, 100));
       }
+      console.log("got the track ", track);
       const queue = cache[track];
       if (!queue) return;
 
       const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
       if (next >= 0 && next < queue.length) {
-        //console.log("exe");
         localStorage.setItem(
           "playersequence",
           JSON.stringify({ track, currentIndex: next }),
         );
-        return navigate(`/play/${queue[next].id}`, { replace: true });
+        const songId = queue[next].id;
+
+        playTrack(songId);
+
+        return;
       }
+
       // generating random int to play song randomly if there's no song left in the sequence
-      navigate(`/play/${getRandomInt(1, 100)}`, { replace: true });
+      playTrack(getRandomInt(1, 100));
     } catch (e) {
       console.error("Navigation error:", e);
     }
@@ -130,7 +148,7 @@ const PlayerPage = () => {
   const handleLikeClick = async () => {
     const prev = isLiked;
     setIsLiked(!prev);
-    const result = await toggleLikeStatus(id);
+    const result = await toggleLikeStatus(currentSongId);
     if (!result.success) {
       setIsLiked(prev);
       showToast(result.error, "failure");
@@ -150,15 +168,12 @@ const PlayerPage = () => {
 
   return (
     <div
-      className={isMinimized ? styles.miniPlayer : styles.fullPlayerContainer}
+      className={
+        isPlayerMinimized ? styles.miniPlayer : styles.fullPlayerContainer
+      }
     >
-      {!isMinimized && (
-        <div
-          className={styles.back_btn}
-          onClick={() => {
-            setMinimized(!isMinimized);
-          }}
-        >
+      {!isPlayerMinimized && (
+        <div className={styles.back_btn} onClick={handleMinimizeToggle}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -226,11 +241,11 @@ const PlayerPage = () => {
 
       <div
         className={
-          isMinimized ? styles.playerContent_mini : styles.playerContent
+          isPlayerMinimized ? styles.playerContent_mini : styles.playerContent
         }
       >
         {/* Visualiser */}
-        {!isMinimized && (
+        {!isPlayerMinimized && (
           <div className={styles.topSection}>
             <MusicVisual isPlaying={isPlaying} />
           </div>
@@ -243,7 +258,7 @@ const PlayerPage = () => {
             alt={song.title}
             className={styles.albumArt}
             draggable={false}
-            onClick={() => setMinimized(false)}
+            onClick={() => setIsPlayerMinimized(false)}
           />
           <div
             className={styles.imageGlow}
@@ -257,7 +272,7 @@ const PlayerPage = () => {
             <h2>{song.title}</h2>
             <p
               style={
-                isMinimized
+                isPlayerMinimized
                   ? {
                       alignSelf: "start",
                       textAlign: "start",
@@ -271,7 +286,7 @@ const PlayerPage = () => {
               {song.creator_name}
             </p>
           </div>
-          {!isMinimized && (
+          {!isPlayerMinimized && (
             <div
               style={{
                 display: "flex",
@@ -288,6 +303,49 @@ const PlayerPage = () => {
                 aria-label="Add to playlist"
               >
                 <ListPlus size={18} strokeWidth={1.8} />
+              </button>
+
+              {/*share button */}
+              <button
+                className={styles.actionBtn}
+                type="button"
+                onClick={() => {
+                  const url = `${Details.appDomain}play/${currentSongId}`;
+                  navigator.clipboard
+                    .writeText(url)
+                    .then(() => {
+                      Notification.requestPermission().then((perm) => {
+                        if (perm === "granted")
+                          new Notification("go spam the link homie");
+                      });
+                    })
+                    .catch((err) => {
+                      Notification.requestPermission().then((perm) => {
+                        if (perm === "granted")
+                          new Notification("something went wrong ");
+                      });
+                      console.log(err);
+                    });
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-share2-icon lucide-share-2"
+                >
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+                  <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+                </svg>
               </button>
 
               {/* Like */}
@@ -359,7 +417,7 @@ const PlayerPage = () => {
         </div>
 
         {/* Controls */}
-        {!isMinimized && (
+        {!isPlayerMinimized && (
           <div className={styles.controlsSection}>
             <input
               type="range"
@@ -416,7 +474,7 @@ const PlayerPage = () => {
       {/* Modals */}
       <PlaylistDisplay
         show={isPlaylistOpen}
-        songId={id}
+        songId={currentSongId}
         setToast={showToast}
         onClose={() => setIsPlaylistOpen(false)}
         onNewPlaylist={() => {

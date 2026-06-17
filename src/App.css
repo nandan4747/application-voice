@@ -1,0 +1,33 @@
+.global-overlay-layer-full-screen {
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0px;
+  bottom: auto;
+  width: auto;
+  height: auto;
+  
+}
+.global-overlay-layer-mini-screen {
+  position: fixed;
+  z-index: 999;
+  right: 10px;
+  bottom: 70px;
+  top: auto;
+  width: auto;
+  height: auto;
+ 
+ 
+}
+
+/* mobile view */
+@media (max-width:500px){
+.global-overlay-layer-mini-screen{
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+     right: auto;
+    
+}
+
+}

@@ -1,6 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import styles from "./SongListItem.module.css";
+import { useMusic } from "../MusicContext";
 
 const SongListItem = ({
   songId,
@@ -10,7 +10,7 @@ const SongListItem = ({
   sequnceApiUrl,
   currentIndex,
 }) => {
-  const navigate = useNavigate();
+  const { playTrack } = useMusic();
   const imageUrl = `https://picsum.photos/seed/${songId}/150/150`;
 
   const handleNavigate = () => {
@@ -19,7 +19,7 @@ const SongListItem = ({
       currentIndex: currentIndex,
     };
     localStorage.setItem("playersequence", JSON.stringify(sequenceObj));
-    navigate(`/play/${songId}`);
+    playTrack(songId)
   };
 
   return (
