@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, signUpUser } from "../api/authFunctions";
 import styles from "./AuthPage.module.css";
 import { Music, Mail, Lock, User, AlertCircle } from "lucide-react";
+import { useMusic } from "../MusicContext";
 
 const AuthPage = () => {
+  const { closePlayer } = useMusic();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -13,6 +15,10 @@ const AuthPage = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    closePlayer();
+  }, []);
   const navigate = useNavigate();
 
   const set = (field) => (e) =>

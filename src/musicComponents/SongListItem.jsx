@@ -19,7 +19,7 @@ const SongListItem = ({
       currentIndex: currentIndex,
     };
     localStorage.setItem("playersequence", JSON.stringify(sequenceObj));
-    playTrack(songId)
+    playTrack(songId);
   };
 
   return (

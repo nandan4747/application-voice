@@ -43,6 +43,7 @@ const PlayerPage = () => {
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
   const [playInLoop, setPlayInLoop] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -61,7 +62,8 @@ const PlayerPage = () => {
   /* ── Data fetching ── */
   useEffect(() => {
     if (!currentSongId) return;
-
+    
+    setIsLoading(true);
     const fetchSong = async () => {
       const res = await await getSongDetails(currentSongId);
 
@@ -71,6 +73,7 @@ const PlayerPage = () => {
       }
 
       if (res?.song) setSong(res.song);
+      setIsLoading(false);
     };
     fetchSong();
   }, [currentSongId]);
@@ -79,6 +82,8 @@ const PlayerPage = () => {
     if (!currentSongId) return;
 
     const checkFlag = async () => {
+      const loginFlag = localStorage.getItem("isLoggedIn") === "yes";
+      if (!loginFlag) return;
       const res = await checkSongLikedFlag(currentSongId);
       setIsLiked(!!res?.alreadyLiked);
     };
@@ -111,6 +116,7 @@ const PlayerPage = () => {
 
   /* ── Queue navigation ── */
   const handleNavigation = (direction) => {
+    
     try {
       const raw = localStorage.getItem("playersequence") || false;
 
@@ -121,7 +127,7 @@ const PlayerPage = () => {
       if (!track) {
         playTrack(getRandomInt(1, 100));
       }
-      console.log("got the track ", track);
+
       const queue = cache[track];
       if (!queue) return;
 
@@ -157,7 +163,7 @@ const PlayerPage = () => {
   };
 
   /* ── Loading state ── */
-  if (!song) {
+  if (!song || isLoading) {
     return (
       <div className={styles.loadingScreen}>
         <SearchLoader />
