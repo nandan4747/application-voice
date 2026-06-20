@@ -320,16 +320,10 @@ const PlayerPage = () => {
                   navigator.clipboard
                     .writeText(url)
                     .then(() => {
-                      Notification.requestPermission().then((perm) => {
-                        if (perm === "granted")
-                          new Notification("go spam the link homie");
-                      });
+                      showToast("link copied");
                     })
                     .catch((err) => {
-                      Notification.requestPermission().then((perm) => {
-                        if (perm === "granted")
-                          new Notification("something went wrong ");
-                      });
+                      showToast("unable to copy link", "error");
                       console.log(err);
                     });
                 }}
@@ -502,9 +496,10 @@ const PlayerPage = () => {
       {toast.show && (
         <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
+
       {isPlayerMinimized && (
         <div
-          className={`${styles.cancelBtn} ${styles.actionBtn}`}
+          className={`${styles.cancelBtn}`}
           onClick={() => {
             closePlayer();
           }}

@@ -21,10 +21,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   color: var(--text-primary);
   font-family: var(--font-body);
-  padding-top: 3%; /* navbar height */
-  padding-bottom: 48px;
+
   position: relative;
   overflow: hidden;
 }
@@ -74,7 +74,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
 }
 
 /* ── Visualiser row ── */
@@ -82,15 +81,13 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 24px 0 20px;
   opacity: 0.7;
 }
 
 /* ── Album art ── */
 .imageContainer {
   position: relative;
-  width: 280px;
-  height: 280px;
+  width: 100%;
   margin-bottom: 36px;
   flex-shrink: 0;
 }
@@ -321,6 +318,7 @@
 /* ── Loading screen ── */
 .loadingScreen {
   min-height: 100vh;
+  width: 100vw;
   background: var(--bg-base);
   display: flex;
   align-items: center;
@@ -345,11 +343,6 @@
 }
 /* ── Mobile ── */
 @media (max-width: 480px) {
-  .imageContainer {
-    width: 240px;
-    height: 240px;
-  }
-
   .playerContent {
     padding: 0 20px;
   }
@@ -425,7 +418,13 @@
   align-self: center;
   justify-self: center;
   z-index: 999;
+  color: rgb(160, 160, 160);
   margin-right: 10px;
+
+}
+.cancelBtn :hover{
+  transform: scale(1.1);
+  color: white;
 }
 
 /* .miniPlayer's mobile view*/
