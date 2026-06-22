@@ -10,7 +10,8 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
   const loc = useLocation();
   const playlistId = loc.state?.playlistId;
   const playlistName = loc.state?.playlistName ?? "Playlist";
-  const imageUrl = `https://picsum.photos/seed/${playlistId + 200}/300/300`;
+  //const imageUrl = `https://picsum.photos/seed/${playlistId + 200}/400/400`;
+  const imageUrl = `https://loremflickr.com/200/200/music,abstract?lock=${playlistId +3000}`;
   const token = localStorage.getItem("token");
   const apiUrl = `${Details.domain}user/playlist/songs?playListId=${playlistId}`;
 
@@ -185,7 +186,7 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
         )}
 
         {!hasMore && songs.length > 0 && (
-          <div style={{justifySelf:"center" }}>
+          <div style={{ justifySelf: "center" }}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"

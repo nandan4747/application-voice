@@ -14,7 +14,10 @@ const SongCard = ({
 }) => {
 
   const { playTrack } = useMusic();
-  const imageUrl = `https://picsum.photos/seed/${songId}/300/300`;
+ // const imageUrl = `https://picsum.photos/seed/${songId}/400/400`;
+const imageUrl = `https://loremflickr.com/200/200/music,abstract?lock=${songId}`;
+
+
 
   const handleClick = () => {
     const sequenceObj = {

@@ -19,9 +19,6 @@ const Home = () => {
           <NavBar></NavBar>
         </div>
       }
-      <div className={Styles.player_overlay}>
-        <Outlet />
-      </div>
       <div className={Styles.contents}>
         {
           // recently uploaded

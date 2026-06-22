@@ -55,7 +55,7 @@
   flex-wrap: nowrap;
   overflow-x: auto;
   gap: 14px;
-  padding: 8px 2px 24px;
+  /* padding: 8px 2px 24px; */
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   /* Hide scrollbar */
@@ -171,7 +171,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 40px 20px;
+ 
   color: rgba(255, 255, 255, 0.2);
 }
 

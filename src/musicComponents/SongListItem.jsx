@@ -11,7 +11,8 @@ const SongListItem = ({
   currentIndex,
 }) => {
   const { playTrack } = useMusic();
-  const imageUrl = `https://picsum.photos/seed/${songId}/150/150`;
+  //const imageUrl = `https://picsum.photos/seed/${songId}/400/400`;
+  const imageUrl = `https://loremflickr.com/50/50/music,abstract?lock=${songId}`;
 
   const handleNavigate = () => {
     const sequenceObj = {

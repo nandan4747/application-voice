@@ -62,7 +62,7 @@ const PlayerPage = () => {
   /* ── Data fetching ── */
   useEffect(() => {
     if (!currentSongId) return;
-    
+
     setIsLoading(true);
     const fetchSong = async () => {
       const res = await await getSongDetails(currentSongId);
@@ -116,7 +116,6 @@ const PlayerPage = () => {
 
   /* ── Queue navigation ── */
   const handleNavigation = (direction) => {
-    
     try {
       const raw = localStorage.getItem("playersequence") || false;
 
@@ -171,7 +170,8 @@ const PlayerPage = () => {
     );
   }
 
-  const artUrl = `https://picsum.photos/seed/${song.id}/400`;
+  //const artUrl = `https://picsum.photos/seed/${song.id}/400/400`;
+  const artUrl = `https://loremflickr.com/400/400/music,abstract?lock=${song.id}`;
 
   return (
     <div
