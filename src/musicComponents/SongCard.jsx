@@ -3,6 +3,7 @@ import React from "react";
 import { Play } from "lucide-react";
 import styles from "./SongCard.module.css";
 import { useMusic } from "../MusicContext";
+import { art } from "../api/artProvider";
 
 const SongCard = ({
   songName = "Unknown Track",
@@ -12,12 +13,10 @@ const SongCard = ({
   sequnceApiUrl,
   currentIndex,
 }) => {
-
   const { playTrack } = useMusic();
- // const imageUrl = `https://picsum.photos/seed/${songId}/400/400`;
-const imageUrl = `https://loremflickr.com/200/200/music,abstract?lock=${songId}`;
-
-
+  // const imageUrl = `https://picsum.photos/seed/${songId}/400/400`;
+  //const imageUrl = `https://loremflickr.com/200/200/music,abstract?lock=${songId}`;
+  const imageUrl = art(songId).medium;
 
   const handleClick = () => {
     const sequenceObj = {

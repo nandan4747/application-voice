@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./SongListItem.module.css";
 import { useMusic } from "../MusicContext";
+import { art } from "../api/artProvider";
 
 const SongListItem = ({
   songId,
@@ -12,7 +13,8 @@ const SongListItem = ({
 }) => {
   const { playTrack } = useMusic();
   //const imageUrl = `https://picsum.photos/seed/${songId}/400/400`;
-  const imageUrl = `https://loremflickr.com/50/50/music,abstract?lock=${songId}`;
+  //const imageUrl = `https://loremflickr.com/50/50/music,abstract?lock=${songId}`;
+  const imageUrl = art(songId).mini;
 
   const handleNavigate = () => {
     const sequenceObj = {

@@ -23,6 +23,7 @@ import NavBar from "../navbarComp/Navbar";
 import MusicVisual from "../animations/MusicVisual";
 import { getRandomInt } from "../api/mechanism";
 import { Details } from "../api/HostDetails";
+import { art } from "../api/artProvider";
 
 const PlayerPage = () => {
   const {
@@ -171,7 +172,8 @@ const PlayerPage = () => {
   }
 
   //const artUrl = `https://picsum.photos/seed/${song.id}/400/400`;
-  const artUrl = `https://loremflickr.com/400/400/music,abstract?lock=${song.id}`;
+  //const artUrl = `https://loremflickr.com/400/400/music,abstract?lock=${song.id}`;
+  const artUrl = art(song.id).larg;
 
   return (
     <div

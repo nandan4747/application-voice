@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Details } from "../api/HostDetails";
 import SongListItem from "../musicComponents/SongListItem";
 import { cursors } from "../api/cursors";
+import { art } from "../api/artProvider";
 
 const PlaylistSongs = ({ cursorKey = "playlist" }) => {
   const loc = useLocation();
@@ -13,7 +14,8 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
   //const imageUrl = `https://picsum.photos/seed/${playlistId + 200}/400/400`;
   const imageUrl = `https://loremflickr.com/200/200/music,abstract?lock=${playlistId +3000}`;
   const token = localStorage.getItem("token");
-  const apiUrl = `${Details.domain}user/playlist/songs?playListId=${playlistId}`;
+  //const apiUrl = `${Details.domain}user/playlist/songs?playListId=${playlistId}`;
+  const apiUrl = art(playlistId).medium;
 
   const { cache, setCacheData } = useMusic();
 

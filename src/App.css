@@ -7,11 +7,12 @@
   width: auto;
   height: auto;
   
+  
 }
 .global-overlay-layer-mini-screen {
   position: fixed;
   z-index: 999;
-  right: 10px;
+  left: 10px;
   bottom: 30px;
   top: auto;
   width: auto;
@@ -26,7 +27,7 @@
     width: 100vw;
     display: flex;
     justify-content: center;
-     right: auto;
+    left: auto;
     
 }
 
