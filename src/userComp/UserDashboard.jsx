@@ -4,6 +4,7 @@ import { handleDeleteAccount } from "../api/authFunctions";
 import CreatePlaylistModal from "../playlistComp/CreatePlaylistModal";
 
 import {
+  Home,
   Plus,
   User,
   Lock,
@@ -23,6 +24,7 @@ import { UpdatePasswordForm } from "../forms/UpdatePasswordFrom";
 import { useMusic } from "../MusicContext";
 
 const MENU_OPTIONS = [
+  { id: "home", label: "Home", icon: <Home size={17} /> },
   { id: "userInfo", label: "Profile", icon: <User size={17} /> },
   { id: "updatePassword", label: "Security", icon: <Lock size={17} /> },
   { id: "playlists", label: "Playlists", icon: <ListMusic size={17} /> },
@@ -210,6 +212,8 @@ const UserDashboard = () => {
     if (loading) return <Skeleton />;
 
     switch (activeTab) {
+      case "home":
+        return nav("/");
       case "userInfo":
         return (
           <>

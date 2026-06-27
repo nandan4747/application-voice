@@ -12,10 +12,10 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
   const playlistId = loc.state?.playlistId;
   const playlistName = loc.state?.playlistName ?? "Playlist";
   //const imageUrl = `https://picsum.photos/seed/${playlistId + 200}/400/400`;
-  const imageUrl = `https://loremflickr.com/200/200/music,abstract?lock=${playlistId +3000}`;
+  const imageUrl = art(playlistId).medium;
   const token = localStorage.getItem("token");
-  //const apiUrl = `${Details.domain}user/playlist/songs?playListId=${playlistId}`;
-  const apiUrl = art(playlistId).medium;
+
+  const apiUrl = `${Details.domain}user/playlist/songs?playListId=${playlistId}`;
 
   const { cache, setCacheData } = useMusic();
 
