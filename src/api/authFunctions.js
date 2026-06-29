@@ -41,11 +41,6 @@ export const signUpUser = async (username, email, password) => {
 };
 
 export const handleDeleteAccount = async (onSuccess) => {
-  const confirmDelete = window.confirm(
-    "Are you absolutely sure? This will delete your playlists, likes, and your entire existence on this platform. This cannot be undone!",
-  );
-
-  if (!confirmDelete) return;
 
   const token = localStorage.getItem("token");
 
@@ -63,12 +58,13 @@ export const handleDeleteAccount = async (onSuccess) => {
       localStorage.clear();
       // 2. Send them to the shadow realm (login page)
       onSuccess();
+
     } else {
       const data = await res.json();
       alert(`Error: ${data.error}`);
     }
   } catch (err) {
-    console.error("Deletion failed:", err);
+    console.error("Account Deletion failed:", err);
     alert("Server error. Maybe it's a sign you should stay?");
   }
 };

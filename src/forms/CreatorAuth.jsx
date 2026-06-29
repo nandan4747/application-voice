@@ -83,12 +83,12 @@ const CreatorAuth = () => {
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.label}>Email</label>
+            <label className={styles.label}>Username</label>
             <div className={styles.inputRow}>
               <Mail size={16} className={styles.inputIcon} />
               <input
-                type="email"
-                placeholder="you@studio.com"
+                type="text"
+                placeholder="username"
                 className={styles.input}
                 value={formData.email}
                 onChange={set("email")}

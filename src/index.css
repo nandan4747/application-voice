@@ -18,3 +18,19 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+
+.lexend-custom {
+           font-family: "Lexend", sans-serif;
+           font-optical-sizing: auto;
+           font-weight: 600;
+           font-style: normal;
+         }
+
+
+.josefin-sans-custom {
+                 font-family: "Josefin Sans", sans-serif;
+                 font-optical-sizing: auto;
+                 font-weight: 900;
+                 font-style: normal;
+               }

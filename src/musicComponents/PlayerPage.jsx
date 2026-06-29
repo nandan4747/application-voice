@@ -65,8 +65,10 @@ const PlayerPage = () => {
     if (!currentSongId) return;
 
     setIsLoading(true);
+    audioRef.current.currentTime = 0;
+    setIsLiked(false);
     const fetchSong = async () => {
-      const res = await await getSongDetails(currentSongId);
+      const res =  await getSongDetails(currentSongId);
 
       if (!res) {
         //console.log("no song");
@@ -253,13 +255,6 @@ const PlayerPage = () => {
           isPlayerMinimized ? styles.playerContent_mini : styles.playerContent
         }
       >
-        {/* Visualiser */}
-        {!isPlayerMinimized && (
-          <div className={styles.topSection}>
-            <MusicVisual isPlaying={isPlaying} />
-          </div>
-        )}
-
         {/* Album art */}
         <div className={styles.imageContainer}>
           <img
@@ -278,7 +273,7 @@ const PlayerPage = () => {
         {/* Song info + action buttons */}
         <div className={styles.infoSection}>
           <div
-            className={styles.details}
+              className={`${styles.details} josefin-sans-custom` }
             onClick={() => {
               setIsPlayerMinimized(false);
             }}
@@ -476,6 +471,12 @@ const PlayerPage = () => {
               </button>
             </div>
           </div>
+        )}
+        {/* Visualiser */}
+        {!isPlayerMinimized && (
+            <div className={styles.topSection}>
+              <MusicVisual isPlaying={isPlaying} />
+            </div>
         )}
       </div>
 

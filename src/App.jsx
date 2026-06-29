@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMusic } from "./MusicContext";
 
 import SongLinkHandler from "./musicComponents/SongLinkHandler";
+import {AlertDailog} from "./NotificationComp/AlertDailog.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,7 @@ function App() {
         <Route path="/playlist" element={<PlaylistSongs />} />
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/batchplay" element={<BatchLists />} />
+        <Route path="/temp" element={<AlertDailog />} />
       </Routes>
     </QueryClientProvider>
   );

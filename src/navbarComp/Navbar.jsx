@@ -95,12 +95,12 @@ const NavBar = () => {
         style={{ cursor: "pointer" }}
       >
         <div
-          style={{ display: "flex", alignItems: "center", marginLeft: "3%" }}
+          style={{ display: "flex", alignItems: "center", marginLeft: "5%" }}
         >
           <div className={Styles.logo_container}>
             <img src={logo} alt="logo" />
           </div>
-          <p className={Styles.logo_text}>VOICE...</p>
+          <p className={`${Styles.logo_text} josefin-sans-custom`}>VOICE</p>
         </div>
       </div>
 
