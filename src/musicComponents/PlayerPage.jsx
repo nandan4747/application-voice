@@ -65,7 +65,7 @@ const PlayerPage = () => {
     if (!currentSongId) return;
 
     setIsLoading(true);
-    audioRef.current.currentTime = 0;
+
     setIsLiked(false);
     const fetchSong = async () => {
       const res =  await getSongDetails(currentSongId);
