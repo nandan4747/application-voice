@@ -1,18 +1,21 @@
 import { Details } from "./HostDetails";
-
-export const getUserPlaylists = async () => {
-  const token = localStorage.getItem("token"); // Assuming you named it 'token'
+import { isNotAuth } from "./authenticationHandler";
+export const getUserPlaylists = async (callback) => {
+  const token = localStorage.getItem("token") || "token";
 
   try {
     const response = await fetch(`${Details.domain}user/playlists`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`, // The VIP pass
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
 
     const data = await response.json();
+
+    
+    isNotAuth(response, callback);
     if (response.ok) return { success: true, playlists: data.playlists };
     return { success: false, error: data.error || "Failed to fetch playlists" };
     // eslint-disable-next-line no-unused-vars
@@ -43,7 +46,7 @@ export const createNewPlaylist = async (playlistName) => {
   }
 };
 export const addSongToPlaylist = async (playlistId, songId) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || "token";
   try {
     const response = await fetch(`${Details.domain}user/playlist/add`, {
       method: "POST",

@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { Details } from "./HostDetails";
+import { isNotAuth } from "./authenticationHandler";
 
-export const getCreatorSongs = async (creatorId, cursor = null) => {
+export const getCreatorSongs = async (creatorId, cursor = null, callback) => {
   try {
     const url = new URL(`${Details.domain}user/songs/creator`);
     url.searchParams.set("id", creatorId);
@@ -9,11 +10,12 @@ export const getCreatorSongs = async (creatorId, cursor = null) => {
 
     const response = await fetch(url.toString(), {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${localStorage.getItem("token") || "token"}`,
       },
     });
 
     const data = await response.json();
+    isNotAuth(response, callback);
     if (response.ok)
       return {
         success: true,

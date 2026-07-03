@@ -3,6 +3,8 @@ import { getUserPlaylists, addSongToPlaylist } from "../api/playlistApi";
 import styles from "./Playlist.module.css";
 import SearchLoader from "../animations/SearchLoader";
 import { X, Plus, ListMusic, PlusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { AlertDailog } from "../NotificationComp/AlertDailog";
 
 const PlaylistDisplay = ({
   show = false,
@@ -14,7 +16,14 @@ const PlaylistDisplay = ({
 }) => {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [adding, setAdding] = useState(null); // tracks which playlist is being added to
+  const [adding, setAdding] = useState(null);
+
+  const nav = useNavigate();
+  const [showAlert, setShowAlert] = useState({
+    show: false,
+    message: "message",
+    subHeading: "subHeading",
+  });
 
   // Fetch playlists whenever modal opens
   useEffect(() => {
@@ -23,7 +32,14 @@ const PlaylistDisplay = ({
     const fetchPlaylists = async () => {
       setLoading(true);
       try {
-        const res = await getUserPlaylists();
+        const res = await getUserPlaylists(() => {
+          setShowAlert({
+            show: true,
+            message:
+              "Not a Registered user. you need to login in order to create a playlist. Redirecting to login page.",
+            subHeading: "No account",
+          });
+        });
         if (res.success) setPlaylists(res.playlists);
       } catch {
         // fail silently — modal can retry on next open
@@ -144,6 +160,27 @@ const PlaylistDisplay = ({
             </div>
           )}
         </div>
+      </div>
+      <div>
+        {showAlert.show && (
+          <AlertDailog
+            message={showAlert.message}
+            subHeading={showAlert.subHeading}
+            onConfirm={() => {
+              setShowAlert({
+                show: false,
+              });
+              nav("/auth");
+            }}
+            onCancel={() => {
+              setShowAlert({
+                show: false,
+              });
+              closeFromOutside();
+            }}
+            wanToClosePlaying={false}
+          />
+        )}
       </div>
     </div>
   );

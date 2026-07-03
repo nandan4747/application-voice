@@ -65,10 +65,10 @@ const PlayerPage = () => {
     if (!currentSongId) return;
 
     setIsLoading(true);
-
+    setIsPlaylistOpen(false);
     setIsLiked(false);
     const fetchSong = async () => {
-      const res =  await getSongDetails(currentSongId);
+      const res = await getSongDetails(currentSongId);
 
       if (!res) {
         //console.log("no song");
@@ -273,7 +273,7 @@ const PlayerPage = () => {
         {/* Song info + action buttons */}
         <div className={styles.infoSection}>
           <div
-              className={`${styles.details} josefin-sans-custom` }
+            className={`${styles.details} josefin-sans-custom`}
             onClick={() => {
               setIsPlayerMinimized(false);
             }}
@@ -474,9 +474,9 @@ const PlayerPage = () => {
         )}
         {/* Visualiser */}
         {!isPlayerMinimized && (
-            <div className={styles.topSection}>
-              <MusicVisual isPlaying={isPlaying} />
-            </div>
+          <div className={styles.topSection}>
+            <MusicVisual isPlaying={isPlaying} />
+          </div>
         )}
       </div>
 

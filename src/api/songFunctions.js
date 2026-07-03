@@ -15,7 +15,7 @@ export const getSongDetails = async (songId) => {
 
 export const checkSongLikedFlag = async (songId) => {
   try {
-    const token = localStorage.getItem("token") || 0;
+    const token = localStorage.getItem("token") || "token";
     const url = `${Details.domain}user/likeflag/${songId}`;
     const res = await fetch(url, {
       method: "GET",
@@ -23,6 +23,7 @@ export const checkSongLikedFlag = async (songId) => {
         Authorization: `Bearer ${token}`,
       },
     });
+
     if (res.ok) {
       return await res.json();
     }
@@ -42,10 +43,10 @@ export const toggleLikeStatus = async (songId) => {
 
   try {
     const response = await fetch(`${Details.domain}user/like/${songId}`, {
-      method: "POST", 
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`, 
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -77,10 +78,15 @@ export const fetchMoreByTags = async (tags, cursor) => {
     const tagsParam = encodeURIComponent(tags.join(" "));
     const cursorParam = encodeURIComponent(cursor);
     const response = await fetch(
-      `${Details.domain}user/related?tags=${tagsParam}&nextCursor=${cursorParam}`
+      `${Details.domain}user/related?tags=${tagsParam}&nextCursor=${cursorParam}`,
     );
     const data = await response.json();
-    if (response.ok) return { success: true, results: data.results, nextCursor: data.nextCursor };
+    if (response.ok)
+      return {
+        success: true,
+        results: data.results,
+        nextCursor: data.nextCursor,
+      };
     return { success: false };
   } catch {
     return { success: false };

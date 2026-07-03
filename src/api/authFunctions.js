@@ -1,4 +1,5 @@
 import { Details } from "./HostDetails";
+import { isNotAuth } from "./authenticationHandler";
 
 export const loginUser = async (email, password) => {
   try {
@@ -40,9 +41,8 @@ export const signUpUser = async (username, email, password) => {
   }
 };
 
-export const handleDeleteAccount = async (onSuccess) => {
-
-  const token = localStorage.getItem("token");
+export const handleDeleteAccount = async (onSuccess, callback) => {
+  const token = localStorage.getItem("token") || "token";
 
   try {
     const res = await fetch(`${Details.domain}user/delete-account`, {
@@ -52,13 +52,13 @@ export const handleDeleteAccount = async (onSuccess) => {
       },
     });
 
+    isNotAuth(res, callback);
     if (res.ok) {
       alert("Account deleted successfully. Redirecting...");
       // 1. Clear everything!
       localStorage.clear();
       // 2. Send them to the shadow realm (login page)
       onSuccess();
-
     } else {
       const data = await res.json();
       alert(`Error: ${data.error}`);
