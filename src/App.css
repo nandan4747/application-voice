@@ -6,6 +6,7 @@
   bottom: auto;
   width: auto;
   height: auto;
+  transition: all ease 0.9s;
   
   
 }
@@ -17,6 +18,7 @@
   top: auto;
   width: auto;
   height: auto;
+  transition: all ease 0.9s;
  
  
 }

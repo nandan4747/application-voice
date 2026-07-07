@@ -17,7 +17,6 @@
   bottom: 0;
   min-height: 100vh;
   min-width: 100vw;
-  background: var(--bg-base);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,6 +26,21 @@
 
   position: relative;
   overflow: scroll;
+
+   /* Slight tint so content stays readable over the distortion */
+  background: rgba(0, 0, 0, 0.941);
+
+  /* Normal blur fallback */
+  backdrop-filter: blur(10px);
+
+  /* The actual magic: calling the SVG filter by its ID */
+  backdrop-filter: url(#liquid-glass);
+  -webkit-backdrop-filter: url(#liquid-glass);
+
+  border: 0.3px solid rgba(255, 255, 255, 0.226);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+
+  transition: all ease 0.9s;
 }
 
 /*mini bottom player*/
@@ -148,7 +162,7 @@
   font-weight: 900;
   letter-spacing: -0.02em;
   color: var(--text-primary);
- margin: 0 0 4px;
+  margin: 0 0 4px;
   white-space: wrap;
   text-overflow: ellipsis;
 }
@@ -355,10 +369,11 @@
 /* mini player */
 
 /* Add this right above your other .miniPlayer child selectors */
+/*
 .miniPlayer {
   width: 35vw;
-  height: 70px; /* The actual height of your minimized bar */
-  background: var(--bg-surface); /* Matches your dark theme */
+  height: 70px; 
+  background: var(--bg-surface); 
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -367,6 +382,32 @@
   transition: all 0.3s ease-in-out;
   cursor: pointer;
   border-radius: 16px;
+}
+  */
+
+.miniPlayer {
+  width: 35vw;
+  height: 70px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+
+  /* Slight tint so content stays readable over the distortion */
+  background: rgba(0, 0, 0, 0.226);
+
+  /* Normal blur fallback */
+  backdrop-filter: blur(10px);
+
+  /* The actual magic: calling the SVG filter by its ID */
+  backdrop-filter: url(#liquid-glass);
+  -webkit-backdrop-filter: url(#liquid-glass);
+
+  border: 0.3px solid rgba(255, 255, 255, 0.226);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+  transition: all ease 0.9s;
 }
 
 .playerContent_mini {

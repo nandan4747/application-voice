@@ -88,7 +88,76 @@ const NavBar = () => {
     <div
       className={`${Styles.main} ${mobileSearchActive ? Styles.searchExpanded : ""} ${scrolled ? Styles.scrolled : ""}`}
     >
+      {
+        /* glass effect stuff */
+        <svg
+          style={{ width: 0, height: 0, position: "absolute" }}
+          aria-hidden="true"
+        >
+          <filter id="liquid-glass">
+            <feTurbulence
+              type="fractalNoise"
+               baseFrequency="0.0009"
+              numOctaves="10"
+              result="warp"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+          
+              scale="69"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="distorted"
+            />
+            <feColorMatrix
+              in="distorted"
+              type="matrix"
+              values="1 0 0 0 0
+              0 0 0 0 0
+              0 0 0 0 0
+              0 0 0 1 0"
+              result="red"
+            />
+            <feColorMatrix
+              in="distorted"
+              type="matrix"
+              values="0 0 0 0 0
+              0 1 0 0 0
+              0 0 0 0 0
+              0 0 0 1 0"
+              result="green"
+            />
+            <feColorMatrix
+              in="distorted"
+              type="matrix"
+              values="0 0 0 0 0
+              0 0 0 0 0
+              0 0 1 0 0
+              0 0 0 1 0"
+              result="blue"
+            />
+            <feOffset in="red" dx="-0.9" dy="2.4" result="red_shifted" />
+            <feOffset in="blue" dx="2" dy="-2.4" result="blue_shifted" />
+            <feBlend
+              mode="screen"
+              in="red_shifted"
+              in2="green"
+              result="rg_combo"
+            />
+            <feBlend
+              mode="screen"
+              in="rg_combo"
+              in2="blue_shifted"
+              result="final_prism"
+            />
+          </filter>
+        </svg>
+      }
+      {/*blur effect div */}
+
+      
       {/* Logo — hidden on mobile when search is active */}
+
       <div
         className={`${Styles.logo_section} ${mobileSearchActive ? Styles.hidden : ""}`}
         onClick={() => navigate("/")}
