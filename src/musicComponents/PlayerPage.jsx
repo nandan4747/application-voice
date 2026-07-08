@@ -266,6 +266,7 @@ const PlayerPage = () => {
                   ? {
                       alignSelf: "start",
                       textAlign: "start",
+                      
                     }
                   : {
                       alignSelf: "center",

@@ -26,7 +26,7 @@
 
   position: relative;
   overflow: scroll;
-  background:#0a0a0aeb;
+  background:#0a0a0af9;
 
   /* Fallback for browsers/situations where the SVG filter fails */
   backdrop-filter: blur(10px);
