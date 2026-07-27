@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import Toast from "../NotificationComp/Toast";
 import { UpdatePasswordForm } from "../forms/UpdatePasswordFrom";
 import { useMusic } from "../MusicContext";
-import {AlertDailog} from "../NotificationComp/AlertDailog.jsx";
+import { AlertDailog } from "../NotificationComp/AlertDailog.jsx";
 
 const MENU_OPTIONS = [
   { id: "home", label: "Home", icon: <Home size={17} /> },
@@ -122,8 +122,10 @@ const UserDashboard = () => {
   const [loadingMoreLiked, setLoadingMoreLiked] = useState(false);
   const likedSentinelRef = useRef(null);
   const [showAlertDailog, setShowAlertDalog] = useState(false);
-  const [alertDailogConfig, setAlertDailogConfig] = useState({message : "message",subHeading : "sub heading",});
-
+  const [alertDailogConfig, setAlertDailogConfig] = useState({
+    message: "message",
+    subHeading: "sub heading",
+  });
 
   const token = localStorage.getItem("token");
 
@@ -218,10 +220,10 @@ const UserDashboard = () => {
 
      */
     await handleDeleteAccount(() => nav("/auth"));
-  }
+  };
   const onAlertCancel = () => {
     setShowAlertDalog(false);
-  }
+  };
   /* ── Tab content ── */
   const renderContent = () => {
     if (loading) return <Skeleton />;
@@ -444,10 +446,13 @@ const UserDashboard = () => {
           <button
             className={styles.deleteBtn}
             //onClick={() => handleDeleteAccount(() => nav("/auth"))}
-              onClick={()=>{
-                setAlertDailogConfig({message: "this action cannot be undone .",subHeading: "Account is going to be deleted"});
-                setShowAlertDalog(true);
-              }}
+            onClick={() => {
+              setAlertDailogConfig({
+                message: "this action cannot be undone .",
+                subHeading: "Account is going to be deleted",
+              });
+              setShowAlertDalog(true);
+            }}
           >
             <Trash2 size={16} /> Delete Account
           </button>
@@ -468,16 +473,21 @@ const UserDashboard = () => {
 
       <main className={styles.mainContent}>{renderContent()}</main>
       {toast.show && <Toast message={toast.message} type={toast.type} />}
-      {
-        showAlertDailog &&
-        <div style={{
-          zIndex: 999,
-          position: "fixed",
-
-        }}>
-          <AlertDailog message={alertDailogConfig.message} subHeading={alertDailogConfig.subHeading} onConfirm={onAlertSuccess} onCancel={onAlertCancel}></AlertDailog>
+      {showAlertDailog && (
+        <div
+          style={{
+            zIndex: 999,
+            position: "fixed",
+          }}
+        >
+          <AlertDailog
+            message={alertDailogConfig.message}
+            subHeading={alertDailogConfig.subHeading}
+            onConfirm={onAlertSuccess}
+            onCancel={onAlertCancel}
+          ></AlertDailog>
         </div>
-      }
+      )}
     </div>
   );
 };

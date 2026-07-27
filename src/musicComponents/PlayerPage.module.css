@@ -26,14 +26,13 @@
 
   position: relative;
   overflow: scroll;
-  background:#0a0a0af9;
+  background: #0a0a0af9;
 
   /* Fallback for browsers/situations where the SVG filter fails */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
   /* The actual magic: calling the SVG filter by its ID */
-  
 
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
 
@@ -330,14 +329,14 @@
 
 /* ── Loading screen ── */
 .loadingScreen {
-  min-height: 100vh;
+  position: absolute;
+  height: 100vh;
   width: 100vw;
   background: var(--bg-base);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 999;
-  position: absolute;
 }
 
 .loop_btn {

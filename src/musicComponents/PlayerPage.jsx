@@ -94,6 +94,19 @@ const PlayerPage = () => {
   }, [currentSongId]);
 
   if (!currentSongId) return null;
+  if (!song) {
+    return (
+      <div
+        className={
+          isPlayerMinimized ? styles.miniPlayer : styles.fullPlayerContainer
+        }
+      >
+        <div className={styles.loadingScreen}>
+          <SearchLoader />
+        </div>
+      </div>
+    );
+  }
 
   const handleMinimizeToggle = () => {
     setIsPlayerMinimized(!isPlayerMinimized);
@@ -164,15 +177,6 @@ const PlayerPage = () => {
     }
   };
 
-  /* ── Loading state ── */
-  if (!song || isLoading) {
-    return (
-      <div className={styles.loadingScreen}>
-        <SearchLoader />
-      </div>
-    );
-  }
-
   const artUrl = art(song.id).larg;
 
   return (
@@ -181,6 +185,11 @@ const PlayerPage = () => {
         isPlayerMinimized ? styles.miniPlayer : styles.fullPlayerContainer
       }
     >
+      {isLoading && (
+        <div className={styles.loadingScreen}>
+          <SearchLoader />
+        </div>
+      )}
       {!isPlayerMinimized && (
         <div className={styles.back_btn} onClick={handleMinimizeToggle}>
           <svg
@@ -266,7 +275,6 @@ const PlayerPage = () => {
                   ? {
                       alignSelf: "start",
                       textAlign: "start",
-                      
                     }
                   : {
                       alignSelf: "center",
