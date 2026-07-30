@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useCallback } from "react";
 
 const MusicContext = createContext();
 
@@ -10,14 +10,14 @@ export const MusicProvider = ({ children }) => {
   const [currentSongId, setCurrentSongId] = useState(null);
   const [isPlayerMinimized, setIsPlayerMinimized] = useState(false);
 
-  const playTrack = (id) => {
+  const playTrack = useCallback((id) => {
     setCurrentSongId(id);
     setIsPlayerMinimized(false);
-  };
+  }, []);
 
-  const closePlayer = () => {
+  const closePlayer = useCallback(() => {
     setCurrentSongId(null);
-  };
+  }, []);
 
   const setCacheData = (key, data) => {
     setCache((prev) => ({ ...prev, [key]: data }));

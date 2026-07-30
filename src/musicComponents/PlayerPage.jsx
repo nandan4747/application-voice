@@ -63,11 +63,11 @@ const PlayerPage = () => {
   /* ── Data fetching ── */
   useEffect(() => {
     if (!currentSongId) return;
-
-    setIsLoading(true);
-    setIsPlaylistOpen(false);
-    setIsLiked(false);
     const fetchSong = async () => {
+      //console.log("fetching details of song----------------------");
+      setIsLoading(true);
+      setIsPlaylistOpen(false);
+      setIsLiked(false);
       const res = await getSongDetails(currentSongId);
 
       if (!res) {
@@ -79,7 +79,7 @@ const PlayerPage = () => {
       setIsLoading(false);
     };
     fetchSong();
-  }, [currentSongId]);
+  }, [currentSongId, playTrack]);
 
   useEffect(() => {
     if (!currentSongId) return;

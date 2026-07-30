@@ -97,13 +97,12 @@ const NavBar = () => {
           <filter id="liquid-glass">
             <feTurbulence
               type="fractalNoise"
-               baseFrequency="0.0009"
+              baseFrequency="0.0009"
               numOctaves="10"
               result="warp"
             />
             <feDisplacementMap
               in="SourceGraphic"
-          
               scale="69"
               xChannelSelector="R"
               yChannelSelector="G"
@@ -155,7 +154,6 @@ const NavBar = () => {
       }
       {/*blur effect div */}
 
-      
       {/* Logo — hidden on mobile when search is active */}
 
       <div
