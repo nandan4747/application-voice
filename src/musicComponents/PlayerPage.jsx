@@ -64,19 +64,22 @@ const PlayerPage = () => {
   useEffect(() => {
     if (!currentSongId) return;
     const fetchSong = async () => {
-      //console.log("fetching details of song----------------------");
       setIsLoading(true);
       setIsPlaylistOpen(false);
       setIsLiked(false);
-      const res = await getSongDetails(currentSongId);
-
-      if (!res) {
-        //console.log("no song");
-        return playTrack(getRandomInt(1, 100));
+      try {
+        const res = await getSongDetails(currentSongId);
+        if (!res) {
+          playTrack(getRandomInt(1, 120));
+          return;
+        }
+        if (res?.song) setSong(res.song);
+      } catch (err) {
+        console.error("Failed to fetch song, retrying with random track:", err);
+        playTrack(getRandomInt(1, 120));
+      } finally {
+        setIsLoading(false);
       }
-
-      if (res?.song) setSong(res.song);
-      setIsLoading(false);
     };
     fetchSong();
   }, [currentSongId, playTrack]);
@@ -93,7 +96,27 @@ const PlayerPage = () => {
     checkFlag();
   }, [currentSongId]);
 
+  useEffect(() => {
+    if (!song || !("mediaSession" in navigator)) return;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.title,
+      artist: song.creator_name,
+      artwork: [{ src: artUrl, sizes: "512x512", type: "image/png" }],
+    });
+
+    navigator.mediaSession.setActionHandler("play", togglePlay);
+    navigator.mediaSession.setActionHandler("pause", togglePlay);
+    navigator.mediaSession.setActionHandler("nexttrack", () =>
+      handleNavigation("next"),
+    );
+    navigator.mediaSession.setActionHandler("previoustrack", () =>
+      handleNavigation("prev"),
+    );
+  }, [song]);
+
   if (!currentSongId) return null;
+
   if (!song) {
     return (
       <div
@@ -223,12 +246,13 @@ const PlayerPage = () => {
         onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
         onCanPlay={(e) => {
-          try {
-            e.target.play();
-            setIsPlaying(true);
-          } catch {
-            /* autoplay blocked — user can press play */
-          }
+          e.target
+            .play()
+            .then(() => setIsPlaying(true))
+            .catch((err) => {
+              console.warn("Autoplay blocked:", err);
+              setIsPlaying(false);
+            });
         }}
         onEnded={() => {
           if (playInLoop) {
