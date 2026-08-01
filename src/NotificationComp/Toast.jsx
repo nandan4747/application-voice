@@ -42,10 +42,6 @@ const Toast = ({ message, type = "success", onClose }) => {
         }
 
         .toast-root {
-          position: fixed;
-          top: 24px;
-          right: 24px;
-          z-index: 9999;
           font-family: 'DM Sans', sans-serif;
           animation: ${isFading ? "toastOut 0.28s cubic-bezier(0.4,0,1,1) forwards" : "toastIn 0.42s cubic-bezier(0.16,1,0.3,1) forwards"};
         }

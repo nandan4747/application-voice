@@ -5,7 +5,7 @@ import AnalysisCard from "./AnalysisCard";
 import styles from "./CreatorDashboard.module.css";
 import { BarChart3, TrendingUp, Plus } from "lucide-react";
 import UploadModal from "./UploadModal";
-import Toast from "../NotificationComp/Toast";
+import { useNotification } from "../context/NotificationContext";
 
 const CreatorDashboard = () => {
   const [songs, setSongs] = useState([]);
@@ -14,9 +14,7 @@ const CreatorDashboard = () => {
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [toast, setToast] = useState(null);
-  const showToast = (message, type) => setToast({ message, type });
+  const { addNotification } = useNotification();
 
   const user = JSON.parse(localStorage.getItem("user"));
   const sentinelRef = useRef(null);
@@ -116,7 +114,7 @@ const CreatorDashboard = () => {
             <AnalysisCard
               key={song.id}
               song={song}
-              onToast={showToast}
+              onToast={addNotification}
               onDeleted={(id) =>
                 setSongs((prev) => prev.filter((s) => s.id !== id))
               }
@@ -147,14 +145,6 @@ const CreatorDashboard = () => {
         onClose={() => setIsModalOpen(false)}
         onUploadSuccess={handleUploadSuccess}
       />
-
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
     </div>
   );
 };

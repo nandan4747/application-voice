@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 import {
   Heart,
@@ -15,7 +15,7 @@ import {
 } from "../api/songFunctions";
 import styles from "./PlayerPage.module.css";
 import SearchLoader from "../animations/SearchLoader";
-import Toast from "../NotificationComp/Toast";
+
 import PlaylistDisplay from "../playlistComp/PlaylistDisplay";
 import CreatePlaylistModal from "../playlistComp/CreatePlaylistModal";
 import { useMusic } from "../MusicContext";
@@ -24,6 +24,8 @@ import MusicVisual from "../animations/MusicVisual";
 import { getRandomInt } from "../api/mechanism";
 import { Details } from "../api/HostDetails";
 import { art } from "../api/artProvider";
+
+import { useNotification } from "../context/NotificationContext";
 
 const PlayerPage = () => {
   const {
@@ -45,20 +47,9 @@ const PlayerPage = () => {
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
   const [playInLoop, setPlayInLoop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-    type: "success",
-  });
+  const { addNotification } = useNotification();
 
   //const [isMinimized, setMinimized] = useState(false);
-
-  const showToast = (msg, type = "success") =>
-    setToast({ show: true, message: msg, type });
-  const closeToast = useCallback(
-    () => setToast({ show: false, message: "", type: "success" }),
-    [],
-  );
 
   /* ── Data fetching ── */
   useEffect(() => {
@@ -159,6 +150,7 @@ const PlayerPage = () => {
       const raw = localStorage.getItem("playersequence") || false;
 
       if (!raw) {
+        playTrack(getRandomInt(1, 100));
         return;
       }
       const { track, currentIndex } = JSON.parse(raw);
@@ -196,7 +188,7 @@ const PlayerPage = () => {
     const result = await toggleLikeStatus(currentSongId);
     if (!result.success) {
       setIsLiked(prev);
-      showToast(result.error, "failure");
+      addNotification(result.error, "error");
     }
   };
 
@@ -337,10 +329,10 @@ const PlayerPage = () => {
                   navigator.clipboard
                     .writeText(url)
                     .then(() => {
-                      showToast("link copied");
+                      addNotification("link copied");
                     })
                     .catch((err) => {
-                      showToast("unable to copy link", "error");
+                      addNotification("unable to copy link", "error");
                       console.log(err);
                     });
                 }}
@@ -498,7 +490,7 @@ const PlayerPage = () => {
       <PlaylistDisplay
         show={isPlaylistOpen}
         songId={currentSongId}
-        setToast={showToast}
+        setToast={addNotification}
         onClose={() => setIsPlaylistOpen(false)}
         onNewPlaylist={() => {
           setIsPlaylistOpen(false);
@@ -510,15 +502,11 @@ const PlayerPage = () => {
       <CreatePlaylistModal
         show={isCreatePlaylistOpen}
         onSuccess={() => {
-          showToast("Playlist created!", "success");
+          addNotification("Playlist created!", "success");
           setIsCreatePlaylistOpen(false);
         }}
         onClose={() => setIsCreatePlaylistOpen(false)}
       />
-
-      {toast.show && (
-        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
-      )}
 
       {isPlayerMinimized && (
         <div
