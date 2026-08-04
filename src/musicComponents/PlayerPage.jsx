@@ -74,7 +74,7 @@ const PlayerPage = () => {
     };
     fetchSong();
   }, [currentSongId, playTrack]);
-
+  const artUrl = song ? art(song.id)?.larg : "";
   useEffect(() => {
     if (!currentSongId) return;
 
@@ -104,23 +104,16 @@ const PlayerPage = () => {
     navigator.mediaSession.setActionHandler("previoustrack", () =>
       handleNavigation("prev"),
     );
-  }, [song]);
+
+    return () => {
+      navigator.mediaSession.setActionHandler("play", null);
+      navigator.mediaSession.setActionHandler("pause", null);
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+      navigator.mediaSession.setActionHandler("previoustrack", null);
+    };
+  }, [song, artUrl, isPlaying]);
 
   if (!currentSongId) return null;
-
-  if (!song) {
-    return (
-      <div
-        className={
-          isPlayerMinimized ? styles.miniPlayer : styles.fullPlayerContainer
-        }
-      >
-        <div className={styles.loadingScreen}>
-          <SearchLoader />
-        </div>
-      </div>
-    );
-  }
 
   const handleMinimizeToggle = () => {
     setIsPlayerMinimized(!isPlayerMinimized);
@@ -192,8 +185,6 @@ const PlayerPage = () => {
     }
   };
 
-  const artUrl = art(song.id).larg;
-
   return (
     <div
       className={
@@ -232,29 +223,31 @@ const PlayerPage = () => {
       />
 
       {/* Hidden audio element */}
-      <audio
-        ref={audioRef}
-        src={song.song_src}
-        onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
-        onLoadedMetadata={() => setDuration(audioRef.current.duration)}
-        onCanPlay={(e) => {
-          e.target
-            .play()
-            .then(() => setIsPlaying(true))
-            .catch((err) => {
-              console.warn("Autoplay blocked:", err);
-              setIsPlaying(false);
-            });
-        }}
-        onEnded={() => {
-          if (playInLoop) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play();
-            return;
-          }
-          handleNavigation("next");
-        }}
-      />
+      {song && (
+        <audio
+          ref={audioRef}
+          src={song.song_src}
+          onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
+          onLoadedMetadata={() => setDuration(audioRef.current.duration)}
+          onCanPlay={(e) => {
+            e.target
+              .play()
+              .then(() => setIsPlaying(true))
+              .catch((err) => {
+                console.warn("Autoplay blocked:", err);
+                setIsPlaying(false);
+              });
+          }}
+          onEnded={() => {
+            if (playInLoop) {
+              audioRef.current.currentTime = 0;
+              audioRef.current.play();
+              return;
+            }
+            handleNavigation("next");
+          }}
+        />
+      )}
 
       <div
         className={
@@ -262,20 +255,21 @@ const PlayerPage = () => {
         }
       >
         {/* Album art */}
-        <div className={styles.imageContainer}>
-          <img
-            src={artUrl}
-            alt={song.title}
-            className={styles.albumArt}
-            draggable={false}
-            onClick={() => setIsPlayerMinimized(false)}
-          />
-          <div
-            className={styles.imageGlow}
-            style={{ backgroundImage: `url(${artUrl})` }}
-          />
-        </div>
-
+        {song && (
+          <div className={styles.imageContainer}>
+            <img
+              src={artUrl}
+              alt={"music cover"}
+              className={styles.albumArt}
+              draggable={false}
+              onClick={() => setIsPlayerMinimized(false)}
+            />
+            <div
+              className={styles.imageGlow}
+              style={{ backgroundImage: `url(${artUrl})` }}
+            />
+          </div>
+        )}
         {/* Song info + action buttons */}
         <div className={styles.infoSection}>
           <div
@@ -284,22 +278,24 @@ const PlayerPage = () => {
               setIsPlayerMinimized(false);
             }}
           >
-            <h2>{song.title}</h2>
-            <p
-              style={
-                isPlayerMinimized
-                  ? {
-                      alignSelf: "start",
-                      textAlign: "start",
-                    }
-                  : {
-                      alignSelf: "center",
-                      textAlign: "center",
-                    }
-              }
-            >
-              {song.creator_name}
-            </p>
+            {song && <h2>{song.title || "song title"}</h2>}
+            {song && (
+              <p
+                style={
+                  isPlayerMinimized
+                    ? {
+                        alignSelf: "start",
+                        textAlign: "start",
+                      }
+                    : {
+                        alignSelf: "center",
+                        textAlign: "center",
+                      }
+                }
+              >
+                {song.creator_name}
+              </p>
+            )}
           </div>
           {!isPlayerMinimized && (
             <div
