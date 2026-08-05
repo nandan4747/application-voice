@@ -38,6 +38,11 @@ const PlayerPage = () => {
   } = useMusic();
   const audioRef = useRef(null);
 
+  // NEW: holds the fully-resolved next track ({ id, song }) once prefetched
+  const nextTrackRef = useRef(null);
+  // NEW: tracks which currentSongId we've already prefetched-for, so we only do it once per song
+  const prefetchedForRef = useRef(null);
+
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -48,13 +53,19 @@ const PlayerPage = () => {
   const [playInLoop, setPlayInLoop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotification();
+  const [isPreFetchedSuccess, setIsPreFetchedSuccess] = useState(false);
 
   //const [isMinimized, setMinimized] = useState(false);
 
   /* ── Data fetching ── */
   useEffect(() => {
     if (!currentSongId) return;
+    if (isPreFetchedSuccess) {
+      setIsPreFetchedSuccess(false);
+      return;
+    }
     const fetchSong = async () => {
+      // console.log("general fetch");
       setIsLoading(true);
       setIsPlaylistOpen(false);
       setIsLiked(false);
@@ -74,7 +85,7 @@ const PlayerPage = () => {
     };
     fetchSong();
   }, [currentSongId, playTrack]);
-  const artUrl = song ? art(song.id)?.larg : "";
+
   useEffect(() => {
     if (!currentSongId) return;
 
@@ -93,7 +104,9 @@ const PlayerPage = () => {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: song.title,
       artist: song.creator_name,
-      artwork: [{ src: artUrl, sizes: "512x512", type: "image/png" }],
+      artwork: [
+        { src: art(song.id).larg, sizes: "512x512", type: "image/png" },
+      ],
     });
 
     navigator.mediaSession.setActionHandler("play", togglePlay);
@@ -104,16 +117,36 @@ const PlayerPage = () => {
     navigator.mediaSession.setActionHandler("previoustrack", () =>
       handleNavigation("prev"),
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song]);
 
-    return () => {
-      navigator.mediaSession.setActionHandler("play", null);
-      navigator.mediaSession.setActionHandler("pause", null);
-      navigator.mediaSession.setActionHandler("nexttrack", null);
-      navigator.mediaSession.setActionHandler("previoustrack", null);
-    };
-  }, [song, artUrl, isPlaying]);
+  // NEW: keep the OS-level play/pause indicator in sync
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+    navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+  }, [isPlaying]);
+
+  // NEW: reset prefetch bookkeeping whenever the track actually changes
+  useEffect(() => {
+    prefetchedForRef.current = null;
+    nextTrackRef.current = null;
+  }, [currentSongId]);
 
   if (!currentSongId) return null;
+
+  if (!song) {
+    return (
+      <div
+        className={
+          isPlayerMinimized ? styles.miniPlayer : styles.fullPlayerContainer
+        }
+      >
+        <div className={styles.loadingScreen}>
+          <SearchLoader />
+        </div>
+      </div>
+    );
+  }
 
   const handleMinimizeToggle = () => {
     setIsPlayerMinimized(!isPlayerMinimized);
@@ -137,7 +170,40 @@ const PlayerPage = () => {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  /* ── Queue navigation ── */
+  // NEW: pure "what id comes next" resolver, reused by prefetch + handleNavigation + onEnded
+  const resolveNextId = (direction) => {
+    try {
+      const raw = localStorage.getItem("playersequence");
+      if (!raw) return getRandomInt(1, 100);
+      const { track, currentIndex } = JSON.parse(raw);
+      if (!track) return getRandomInt(1, 100);
+      const queue = cache[track];
+      if (!queue) return null;
+      const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
+      if (next >= 0 && next < queue.length) return queue[next].id;
+      return getRandomInt(1, 100);
+    } catch (e) {
+      console.error("resolveNextId error:", e);
+      return null;
+    }
+  };
+
+  // NEW: advance the stored queue index without changing the currently loaded track
+  const advanceQueueIndex = () => {
+    try {
+      const raw = localStorage.getItem("playersequence");
+      if (!raw) return;
+      const { track, currentIndex } = JSON.parse(raw);
+      localStorage.setItem(
+        "playersequence",
+        JSON.stringify({ track, currentIndex: currentIndex + 1 }),
+      );
+    } catch (e) {
+      console.error("advanceQueueIndex error:", e);
+    }
+  };
+
+  /* ── Queue navigation (used by buttons / media session / prefetch-miss fallback) ── */
   const handleNavigation = (direction) => {
     try {
       const raw = localStorage.getItem("playersequence") || false;
@@ -185,6 +251,8 @@ const PlayerPage = () => {
     }
   };
 
+  const artUrl = art(song.id).larg;
+
   return (
     <div
       className={
@@ -223,31 +291,86 @@ const PlayerPage = () => {
       />
 
       {/* Hidden audio element */}
-      {song && (
-        <audio
-          ref={audioRef}
-          src={song.song_src}
-          onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
-          onLoadedMetadata={() => setDuration(audioRef.current.duration)}
-          onCanPlay={(e) => {
-            e.target
+      <audio
+        ref={audioRef}
+        src={song.song_src}
+        onTimeUpdate={() => {
+          const audio = audioRef.current;
+          if (!audio) return;
+          setCurrentTime(audio.currentTime);
+
+          // NEW: prefetch the next track's data ~15s before this one ends,
+          // once per song, so onEnded can play it with zero network dependency.
+          if (
+            duration &&
+            duration - audio.currentTime <= 15 &&
+            prefetchedForRef.current !== currentSongId &&
+            !playInLoop
+          ) {
+            prefetchedForRef.current = currentSongId;
+            const nextId = resolveNextId("next");
+            if (nextId) {
+              getSongDetails(nextId)
+                .then((res) => {
+                  if (res?.song) {
+                    setIsPreFetchedSuccess(true);
+                    //console.log("prefetch");
+                    nextTrackRef.current = { id: nextId, song: res.song };
+                  }
+                })
+                .catch((err) => {
+                  console.warn("Prefetch failed:", err);
+                  nextTrackRef.current = null;
+                });
+            }
+          }
+        }}
+        onLoadedMetadata={() => setDuration(audioRef.current.duration)}
+        onCanPlay={(e) => {
+          e.target
+            .play()
+            .then(() => setIsPlaying(true))
+            .catch((err) => {
+              console.warn("Autoplay blocked:", err);
+              setIsPlaying(false);
+            });
+        }}
+        onEnded={() => {
+          const audio = audioRef.current;
+
+          if (playInLoop) {
+            audio.currentTime = 0;
+            audio.play();
+            return;
+          }
+
+          const next = nextTrackRef.current;
+          nextTrackRef.current = null;
+
+          if (next) {
+            // NEW: fast path — swap src and play synchronously, no fetch/await
+            // in between, so it survives a suspended/screen-off page.
+            advanceQueueIndex();
+
+            /* audio.src = next.song.song_src;
+            audio
               .play()
               .then(() => setIsPlaying(true))
-              .catch((err) => {
-                console.warn("Autoplay blocked:", err);
-                setIsPlaying(false);
-              });
-          }}
-          onEnded={() => {
-            if (playInLoop) {
-              audioRef.current.currentTime = 0;
-              audioRef.current.play();
-              return;
-            }
+              .catch((err) => console.warn("Autoplay blocked:", err)); */
+
+            setSong(next.song);
+            setIsLiked(false);
+            setCurrentTime(0);
+
+            // Sync context/UI state; this also re-triggers the normal fetch
+            // effect above, but that's fine since audio is already playing.
+            playTrack(next.id);
+          } else {
+            // Prefetch didn't land in time (e.g. very short track) — fall back
             handleNavigation("next");
-          }}
-        />
-      )}
+          }
+        }}
+      />
 
       <div
         className={
@@ -255,21 +378,20 @@ const PlayerPage = () => {
         }
       >
         {/* Album art */}
-        {song && (
-          <div className={styles.imageContainer}>
-            <img
-              src={artUrl}
-              alt={"music cover"}
-              className={styles.albumArt}
-              draggable={false}
-              onClick={() => setIsPlayerMinimized(false)}
-            />
-            <div
-              className={styles.imageGlow}
-              style={{ backgroundImage: `url(${artUrl})` }}
-            />
-          </div>
-        )}
+        <div className={styles.imageContainer}>
+          <img
+            src={artUrl}
+            alt={song.title}
+            className={styles.albumArt}
+            draggable={false}
+            onClick={() => setIsPlayerMinimized(false)}
+          />
+          <div
+            className={styles.imageGlow}
+            style={{ backgroundImage: `url(${artUrl})` }}
+          />
+        </div>
+
         {/* Song info + action buttons */}
         <div className={styles.infoSection}>
           <div
@@ -278,24 +400,22 @@ const PlayerPage = () => {
               setIsPlayerMinimized(false);
             }}
           >
-            {song && <h2>{song.title || "song title"}</h2>}
-            {song && (
-              <p
-                style={
-                  isPlayerMinimized
-                    ? {
-                        alignSelf: "start",
-                        textAlign: "start",
-                      }
-                    : {
-                        alignSelf: "center",
-                        textAlign: "center",
-                      }
-                }
-              >
-                {song.creator_name}
-              </p>
-            )}
+            <h2>{song.title}</h2>
+            <p
+              style={
+                isPlayerMinimized
+                  ? {
+                      alignSelf: "start",
+                      textAlign: "start",
+                    }
+                  : {
+                      alignSelf: "center",
+                      textAlign: "center",
+                    }
+              }
+            >
+              {song.creator_name}
+            </p>
           </div>
           {!isPlayerMinimized && (
             <div
