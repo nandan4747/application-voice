@@ -38,16 +38,6 @@ const PlayerPage = () => {
   } = useMusic();
   const audioRef = useRef(null);
 
-  // holds the fully-resolved next track ({ id, song }) once prefetched
-  const nextTrackRef = useRef(null);
-  // tracks which currentSongId we've already prefetched-for, so we only do it once per song
-  const prefetchedForRef = useRef(null);
-  // tracks the exact src string WE last assigned to audio.src ourselves —
-  // never compare against audio.src read back from the DOM, since the
-  // browser resolves it to an absolute URL and it won't match the raw
-  // API string, causing false-mismatch double-assignments.
-  const lastAssignedSrcRef = useRef(null);
-
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -58,19 +48,13 @@ const PlayerPage = () => {
   const [playInLoop, setPlayInLoop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotification();
-  const [isPreFetchedSuccess, setIsPreFetchedSuccess] = useState(false);
 
   //const [isMinimized, setMinimized] = useState(false);
 
   /* ── Data fetching ── */
   useEffect(() => {
     if (!currentSongId) return;
-    if (isPreFetchedSuccess) {
-      setIsPreFetchedSuccess(false);
-      return;
-    }
     const fetchSong = async () => {
-      // console.log("general fetch");
       setIsLoading(true);
       setIsPlaylistOpen(false);
       setIsLiked(false);
@@ -91,23 +75,6 @@ const PlayerPage = () => {
     fetchSong();
   }, [currentSongId, playTrack]);
 
-  // Owns audio.src for every path EXCEPT the onEnded fast-path (which sets
-  // it imperatively itself and updates lastAssignedSrcRef to match, so this
-  // effect sees "nothing changed" and skips re-assigning / re-playing).
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !song?.song_src) return;
-
-    if (lastAssignedSrcRef.current !== song.song_src) {
-      lastAssignedSrcRef.current = song.song_src;
-      audio.src = song.song_src;
-      audio
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
-    }
-  }, [song]);
-
   useEffect(() => {
     if (!currentSongId) return;
 
@@ -126,9 +93,7 @@ const PlayerPage = () => {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: song.title,
       artist: song.creator_name,
-      artwork: [
-        { src: art(song.id).larg, sizes: "512x512", type: "image/png" },
-      ],
+      artwork: [{ src: artUrl, sizes: "512x512", type: "image/png" }],
     });
 
     navigator.mediaSession.setActionHandler("play", togglePlay);
@@ -139,20 +104,7 @@ const PlayerPage = () => {
     navigator.mediaSession.setActionHandler("previoustrack", () =>
       handleNavigation("prev"),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song]);
-
-  // keep the OS-level play/pause indicator in sync
-  useEffect(() => {
-    if (!("mediaSession" in navigator)) return;
-    navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-  }, [isPlaying]);
-
-  // reset prefetch bookkeeping whenever the track actually changes
-  useEffect(() => {
-    prefetchedForRef.current = null;
-    nextTrackRef.current = null;
-  }, [currentSongId]);
 
   if (!currentSongId) return null;
 
@@ -192,40 +144,7 @@ const PlayerPage = () => {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  // pure "what id comes next" resolver, reused by prefetch + handleNavigation + onEnded
-  const resolveNextId = (direction) => {
-    try {
-      const raw = localStorage.getItem("playersequence");
-      if (!raw) return getRandomInt(1, 100);
-      const { track, currentIndex } = JSON.parse(raw);
-      if (!track) return getRandomInt(1, 100);
-      const queue = cache[track];
-      if (!queue) return null;
-      const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
-      if (next >= 0 && next < queue.length) return queue[next].id;
-      return getRandomInt(1, 100);
-    } catch (e) {
-      console.error("resolveNextId error:", e);
-      return null;
-    }
-  };
-
-  // advance the stored queue index without changing the currently loaded track
-  const advanceQueueIndex = () => {
-    try {
-      const raw = localStorage.getItem("playersequence");
-      if (!raw) return;
-      const { track, currentIndex } = JSON.parse(raw);
-      localStorage.setItem(
-        "playersequence",
-        JSON.stringify({ track, currentIndex: currentIndex + 1 }),
-      );
-    } catch (e) {
-      console.error("advanceQueueIndex error:", e);
-    }
-  };
-
-  /* ── Queue navigation (used by buttons / media session / prefetch-miss fallback) ── */
+  /* ── Queue navigation ── */
   const handleNavigation = (direction) => {
     try {
       const raw = localStorage.getItem("playersequence") || false;
@@ -312,84 +231,28 @@ const PlayerPage = () => {
         style={{ backgroundImage: `url(${artUrl})` }}
       />
 
-      {/* Hidden audio element — no src prop here; src is fully owned imperatively */}
+      {/* Hidden audio element */}
       <audio
         ref={audioRef}
-        onTimeUpdate={() => {
-          const audio = audioRef.current;
-          if (!audio) return;
-          setCurrentTime(audio.currentTime);
-
-          // prefetch the next track's data ~15s before this one ends,
-          // once per song, so onEnded can play it with zero network dependency.
-          if (
-            duration &&
-            duration - audio.currentTime <= 15 &&
-            prefetchedForRef.current !== currentSongId &&
-            !playInLoop
-          ) {
-            prefetchedForRef.current = currentSongId;
-            const nextId = resolveNextId("next");
-            if (nextId) {
-              getSongDetails(nextId)
-                .then((res) => {
-                  if (res?.song) {
-                    setIsPreFetchedSuccess(true);
-                    //console.log("prefetch");
-                    nextTrackRef.current = { id: nextId, song: res.song };
-                  }
-                })
-                .catch((err) => {
-                  console.warn("Prefetch failed:", err);
-                  nextTrackRef.current = null;
-                });
-            }
-          }
-        }}
+        src={song.song_src}
+        onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
         onCanPlay={(e) => {
-          if (e.target.paused) {
-            e.target
-              .play()
-              .then(() => setIsPlaying(true))
-              .catch((err) => {
-                console.warn("Autoplay blocked:", err);
-                setIsPlaying(false);
-              });
-          }
+          e.target
+            .play()
+            .then(() => setIsPlaying(true))
+            .catch((err) => {
+              console.warn("Autoplay blocked:", err);
+              setIsPlaying(false);
+            });
         }}
         onEnded={() => {
-          const audio = audioRef.current;
-
           if (playInLoop) {
-            audio.currentTime = 0;
-            audio.play();
+            audioRef.current.currentTime = 0;
+            audioRef.current.play();
             return;
           }
-
-          const next = nextTrackRef.current;
-          nextTrackRef.current = null;
-          if (next && next.song && next.song.song_src) {
-            advanceQueueIndex();
-
-            lastAssignedSrcRef.current = next.song.song_src;
-            audio.src = next.song.song_src;
-
-            audio.load();
-
-            audio
-              .play()
-              .then(() => setIsPlaying(true))
-              .catch((err) => console.warn("Autoplay blocked:", err));
-
-            setSong(next.song);
-            setIsLiked(false);
-            setCurrentTime(0);
-
-            playTrack(next.id);
-          } else {
-            handleNavigation("next");
-          }
+          handleNavigation("next");
         }}
       />
 
