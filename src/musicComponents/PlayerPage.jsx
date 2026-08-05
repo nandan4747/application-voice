@@ -348,13 +348,15 @@ const PlayerPage = () => {
         }}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
         onCanPlay={(e) => {
-          e.target
-            .play()
-            .then(() => setIsPlaying(true))
-            .catch((err) => {
-              console.warn("Autoplay blocked:", err);
-              setIsPlaying(false);
-            });
+          if (e.target.paused) {
+            e.target
+              .play()
+              .then(() => setIsPlaying(true))
+              .catch((err) => {
+                console.warn("Autoplay blocked:", err);
+                setIsPlaying(false);
+              });
+          }
         }}
         onEnded={() => {
           const audio = audioRef.current;
@@ -367,17 +369,14 @@ const PlayerPage = () => {
 
           const next = nextTrackRef.current;
           nextTrackRef.current = null;
-
-          if (next) {
-            // fast path — swap src and play synchronously, no fetch/await
-            // in between, so it survives a suspended/screen-off page.
+          if (next && next.song && next.song.song_src) {
             advanceQueueIndex();
 
-            // Record what we're assigning BEFORE the song-effect can see it,
-            // so when setSong() below triggers that effect, it finds
-            // lastAssignedSrcRef already matching and skips re-assigning.
             lastAssignedSrcRef.current = next.song.song_src;
             audio.src = next.song.song_src;
+
+            audio.load();
+
             audio
               .play()
               .then(() => setIsPlaying(true))
@@ -387,12 +386,8 @@ const PlayerPage = () => {
             setIsLiked(false);
             setCurrentTime(0);
 
-            // Sync context/UI state (route, minimized state, like-flag lookup).
-            // Also re-triggers the general-fetch effect, but isPreFetchedSuccess
-            // (set during prefetch) causes it to skip the actual network call.
             playTrack(next.id);
           } else {
-            // Prefetch didn't land in time (e.g. very short track) — fall back
             handleNavigation("next");
           }
         }}
