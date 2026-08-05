@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMusic } from "./MusicContext";
 
 import SongLinkHandler from "./musicComponents/SongLinkHandler";
-import {AlertDailog} from "./NotificationComp/AlertDailog.jsx";
+import { AlertDailog } from "./NotificationComp/AlertDailog.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +25,7 @@ const queryClient = new QueryClient({
   },
 });
 function App() {
-  const { isPlayerMinimized } = useMusic();
+  const { isPlayerMinimized, currentSongId } = useMusic();
   return (
     <QueryClientProvider client={queryClient}>
       <div
@@ -35,7 +35,7 @@ function App() {
             : "global-overlay-layer-full-screen"
         }
       >
-        <PlayerPage />
+        {currentSongId && <PlayerPage key={currentSongId} />}
       </div>
       <Routes>
         <Route path="/" element={<Home />}></Route>

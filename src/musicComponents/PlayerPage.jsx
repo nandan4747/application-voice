@@ -24,6 +24,7 @@ import MusicVisual from "../animations/MusicVisual";
 import { getRandomInt } from "../api/mechanism";
 import { Details } from "../api/HostDetails";
 import { art } from "../api/artProvider";
+import ProgressBar from "./ProgressBar";
 
 import { useNotification } from "../context/NotificationContext";
 
@@ -40,7 +41,7 @@ const PlayerPage = () => {
 
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
+
   const [duration, setDuration] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
@@ -60,6 +61,7 @@ const PlayerPage = () => {
       setIsLiked(false);
       try {
         const res = await getSongDetails(currentSongId);
+        console.log("fetching song details");
         if (!res) {
           playTrack(getRandomInt(1, 120));
           return;
@@ -131,11 +133,6 @@ const PlayerPage = () => {
     if (!audioRef.current) return;
     isPlaying ? audioRef.current.pause() : audioRef.current.play();
     setIsPlaying(!isPlaying);
-  };
-
-  const handleSliderChange = (e) => {
-    audioRef.current.currentTime = e.target.value;
-    setCurrentTime(Number(e.target.value));
   };
 
   const formatTime = (t) => {
@@ -235,7 +232,6 @@ const PlayerPage = () => {
       <audio
         ref={audioRef}
         src={song.song_src}
-        onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
         onCanPlay={(e) => {
           e.target
@@ -428,19 +424,11 @@ const PlayerPage = () => {
         {/* Controls */}
         {!isPlayerMinimized && (
           <div className={styles.controlsSection}>
-            <input
-              type="range"
-              className={styles.slider}
-              min="0"
-              max={duration || 0}
-              value={currentTime}
-              step="0.1"
-              onChange={handleSliderChange}
+            <ProgressBar
+              audioRef={audioRef}
+              duration={duration}
+              formatTime={formatTime}
             />
-            <div className={styles.timeInfo}>
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
 
             <div className={styles.mainButtons}>
               <button
