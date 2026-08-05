@@ -38,10 +38,15 @@ const PlayerPage = () => {
   } = useMusic();
   const audioRef = useRef(null);
 
-  // NEW: holds the fully-resolved next track ({ id, song }) once prefetched
+  // holds the fully-resolved next track ({ id, song }) once prefetched
   const nextTrackRef = useRef(null);
-  // NEW: tracks which currentSongId we've already prefetched-for, so we only do it once per song
+  // tracks which currentSongId we've already prefetched-for, so we only do it once per song
   const prefetchedForRef = useRef(null);
+  // tracks the exact src string WE last assigned to audio.src ourselves —
+  // never compare against audio.src read back from the DOM, since the
+  // browser resolves it to an absolute URL and it won't match the raw
+  // API string, causing false-mismatch double-assignments.
+  const lastAssignedSrcRef = useRef(null);
 
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -86,6 +91,23 @@ const PlayerPage = () => {
     fetchSong();
   }, [currentSongId, playTrack]);
 
+  // Owns audio.src for every path EXCEPT the onEnded fast-path (which sets
+  // it imperatively itself and updates lastAssignedSrcRef to match, so this
+  // effect sees "nothing changed" and skips re-assigning / re-playing).
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !song?.song_src) return;
+
+    if (lastAssignedSrcRef.current !== song.song_src) {
+      lastAssignedSrcRef.current = song.song_src;
+      audio.src = song.song_src;
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
+    }
+  }, [song]);
+
   useEffect(() => {
     if (!currentSongId) return;
 
@@ -120,13 +142,13 @@ const PlayerPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song]);
 
-  // NEW: keep the OS-level play/pause indicator in sync
+  // keep the OS-level play/pause indicator in sync
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
     navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
   }, [isPlaying]);
 
-  // NEW: reset prefetch bookkeeping whenever the track actually changes
+  // reset prefetch bookkeeping whenever the track actually changes
   useEffect(() => {
     prefetchedForRef.current = null;
     nextTrackRef.current = null;
@@ -170,7 +192,7 @@ const PlayerPage = () => {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  // NEW: pure "what id comes next" resolver, reused by prefetch + handleNavigation + onEnded
+  // pure "what id comes next" resolver, reused by prefetch + handleNavigation + onEnded
   const resolveNextId = (direction) => {
     try {
       const raw = localStorage.getItem("playersequence");
@@ -188,7 +210,7 @@ const PlayerPage = () => {
     }
   };
 
-  // NEW: advance the stored queue index without changing the currently loaded track
+  // advance the stored queue index without changing the currently loaded track
   const advanceQueueIndex = () => {
     try {
       const raw = localStorage.getItem("playersequence");
@@ -290,16 +312,15 @@ const PlayerPage = () => {
         style={{ backgroundImage: `url(${artUrl})` }}
       />
 
-      {/* Hidden audio element */}
+      {/* Hidden audio element — no src prop here; src is fully owned imperatively */}
       <audio
         ref={audioRef}
-        src={song.song_src}
         onTimeUpdate={() => {
           const audio = audioRef.current;
           if (!audio) return;
           setCurrentTime(audio.currentTime);
 
-          // NEW: prefetch the next track's data ~15s before this one ends,
+          // prefetch the next track's data ~15s before this one ends,
           // once per song, so onEnded can play it with zero network dependency.
           if (
             duration &&
@@ -348,22 +369,27 @@ const PlayerPage = () => {
           nextTrackRef.current = null;
 
           if (next) {
-            // NEW: fast path — swap src and play synchronously, no fetch/await
+            // fast path — swap src and play synchronously, no fetch/await
             // in between, so it survives a suspended/screen-off page.
             advanceQueueIndex();
 
-            /* audio.src = next.song.song_src;
+            // Record what we're assigning BEFORE the song-effect can see it,
+            // so when setSong() below triggers that effect, it finds
+            // lastAssignedSrcRef already matching and skips re-assigning.
+            lastAssignedSrcRef.current = next.song.song_src;
+            audio.src = next.song.song_src;
             audio
               .play()
               .then(() => setIsPlaying(true))
-              .catch((err) => console.warn("Autoplay blocked:", err)); */
+              .catch((err) => console.warn("Autoplay blocked:", err));
 
             setSong(next.song);
             setIsLiked(false);
             setCurrentTime(0);
 
-            // Sync context/UI state; this also re-triggers the normal fetch
-            // effect above, but that's fine since audio is already playing.
+            // Sync context/UI state (route, minimized state, like-flag lookup).
+            // Also re-triggers the general-fetch effect, but isPreFetchedSuccess
+            // (set during prefetch) causes it to skip the actual network call.
             playTrack(next.id);
           } else {
             // Prefetch didn't land in time (e.g. very short track) — fall back
