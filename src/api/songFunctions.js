@@ -2,7 +2,7 @@
 import { Details } from "./HostDetails";
 export const getSongDetails = async (songId) => {
   try {
-    const url = `${Details.domain}user/play/${songId} `;
+    const url = `${Details.domain}user/play/${songId}`;
     const res = await fetch(url, { method: "GET" });
     if (!res.ok) {
       return false;

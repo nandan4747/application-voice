@@ -128,6 +128,20 @@ const PlayerPage = () => {
     );
   }, [song]);
 
+  // Imperative src sync — the single source of truth for what the <audio>
+  // element loads. Only writes .src (and reloads) when it's actually out of
+  // sync with the current song, so onEnded's fast-path swap (which already
+  // set .src/.load()/.play() directly on the node) is never redone here and
+  // never aborts its own in-flight play().
+  useEffect(() => {
+    if (!song || !audioRef.current) return;
+    const audio = audioRef.current;
+    const targetSrc = new URL(song.song_src, window.location.href).href;
+    if (audio.src === targetSrc) return;
+    audio.src = song.song_src;
+    audio.load();
+  }, [song]);
+
   if (!currentSongId) return null;
 
   if (!song) {
@@ -281,10 +295,11 @@ const PlayerPage = () => {
         style={{ backgroundImage: `url(${artUrl})` }}
       />
 
-      {/* Hidden audio element */}
+      {/* Hidden audio element — src is managed imperatively below, not via JSX,
+          so React's re-render after setSong() never re-writes it and aborts
+          an in-flight play() (see the sync effect above onCanPlay). */}
       <audio
         ref={audioRef}
-        src={song.song_src}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
         onTimeUpdate={() => {
           const audio = audioRef.current;
@@ -301,13 +316,10 @@ const PlayerPage = () => {
             prefetchedForRef.current = currentSongId;
             const nextId = resolveNextId("next");
             if (nextId) {
-              console.log("pre fetching started");
               getSongDetails(nextId)
                 .then((res) => {
                   if (res?.song) {
-                    console.log("prefetch was success");
                     nextTrackRef.current = { id: nextId, song: res.song };
-                    console.log(`prefetch response : ${nextTrackRef.current}`);
                   }
                 })
                 .catch((err) => {
@@ -333,45 +345,28 @@ const PlayerPage = () => {
             audio.play();
             return;
           }
-          console.log("song ended");
-          console.log("loop is off");
-          console.log("trying to play next song ");
 
           const next = nextTrackRef.current;
           nextTrackRef.current = null;
-          console.log(`got the nextTrackRef data : ${next}`);
 
           if (next) {
-            // Fast path: swap src and call play() directly on the DOM node,
-            // synchronously, BEFORE any setState. This is the actual fix —
-            // React's own scheduler can get throttled on a hidden/screen-off
-            // tab just like everything else, so state updates must not gate
-            // playback. Data is already in hand from the prefetch, so there's
-            // no network round-trip left to be delayed either.
+            console.log("song ended ");
             advanceQueueIndex();
-            console.log("executed advanceQueueIndex");
+
             audio.src = next.song.song_src;
-            console.log(`updated audio src with : ${audio.src}`);
+            console.log("changed song src");
             audio.load();
-            console.log("loaded the audio");
-            console.log("trying play now ");
             audio
               .play()
               .then(() => setIsPlaying(true))
               .catch((err) => console.warn("Autoplay blocked:", err));
-
-            // Sync React state / context after playback has already started.
-            console.log("after the audio.paly() function");
+            console.log("ran .play()");
             setIsPreFetchedSuccess(true);
             setSong(next.song);
-            console.log("next song has been set by setSong(next.song)");
             setIsLiked(false);
-            console.log("now executing playTrack()");
             playTrack(next.id);
-            console.log("after playTrack(next.id)");
+            console.log("after playTrack()");
           } else {
-            // Prefetch didn't land in time (e.g. a very short track) — fall
-            // back to the normal network-driven path.
             handleNavigation("next");
           }
         }}
