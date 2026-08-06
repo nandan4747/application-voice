@@ -134,10 +134,13 @@ const PlayerPage = () => {
   // set .src/.load()/.play() directly on the node) is never redone here and
   // never aborts its own in-flight play().
   useEffect(() => {
+    console.log("inside imparitive effect");
     if (!song || !audioRef.current) return;
     const audio = audioRef.current;
     const targetSrc = new URL(song.song_src, window.location.href).href;
     if (audio.src === targetSrc) return;
+
+    console.log("setting song src to audio.src");
     audio.src = song.song_src;
     audio.load();
   }, [song]);
