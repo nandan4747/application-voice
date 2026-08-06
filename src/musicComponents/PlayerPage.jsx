@@ -39,17 +39,8 @@ const PlayerPage = () => {
   } = useMusic();
   const audioRef = useRef(null);
 
-  // holds the fully-resolved next track ({ id, song }) once prefetched
   const nextTrackRef = useRef(null);
-  // tracks which currentSongId we've already prefetched-for, so we only do it once per song
   const prefetchedForRef = useRef(null);
-  // a detached, off-DOM <audio> used purely to force the browser to actually
-  // download and cache the next track's bytes *while the current track is
-  // still playing* (full network priority). At onEnded we point the real
-  // audioRef at the same URL, which should then be a cache hit instead of a
-  // brand-new network request — new network requests for untouched URLs are
-  // what mobile Chrome blocks/fails on a hidden/screen-locked tab, which is
-  // the actual "NotSupportedError" you're seeing.
   const preloadAudioRef = useRef(null);
   if (!preloadAudioRef.current && typeof Audio !== "undefined") {
     preloadAudioRef.current = new Audio();
@@ -66,17 +57,11 @@ const PlayerPage = () => {
   const [playInLoop, setPlayInLoop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotification();
-  // when true, the next fetchSong effect run is skipped because onEnded
-  // already swapped in the prefetched song synchronously
   const [isPreFetchedSuccess, setIsPreFetchedSuccess] = useState(false);
-
-  //const [isMinimized, setMinimized] = useState(false);
 
   /* ── Data fetching ── */
   useEffect(() => {
     if (!currentSongId) return;
-    // onEnded already swapped audioRef.current.src + song state directly —
-    // skip the redundant network fetch for the track we just prefetched.
     if (isPreFetchedSuccess) {
       setIsPreFetchedSuccess(false);
       return;
@@ -87,7 +72,6 @@ const PlayerPage = () => {
       setIsLiked(false);
       try {
         const res = await getSongDetails(currentSongId);
-        /*console.log("fetching song details");*/
         if (!res) {
           playTrack(getRandomInt(1, 120));
           return;
@@ -103,7 +87,6 @@ const PlayerPage = () => {
     fetchSong();
   }, [currentSongId, playTrack, isPreFetchedSuccess]);
 
-  // reset prefetch bookkeeping whenever the track actually changes
   useEffect(() => {
     prefetchedForRef.current = null;
     nextTrackRef.current = null;
@@ -120,6 +103,10 @@ const PlayerPage = () => {
     };
     checkFlag();
   }, [currentSongId]);
+
+  // artUrl is a pure derivation of `song` — no need for its own state,
+  // it's just recomputed each render (that's what caused the infinite loop).
+  const artUrl = song ? art(song.id).larg : "";
 
   useEffect(() => {
     if (!song || !("mediaSession" in navigator)) return;
@@ -140,11 +127,6 @@ const PlayerPage = () => {
     );
   }, [song]);
 
-  // Imperative src sync — the single source of truth for what the <audio>
-  // element loads. Only writes .src (and reloads) when it's actually out of
-  // sync with the current song, so onEnded's fast-path swap (which already
-  // set .src/.load()/.play() directly on the node) is never redone here and
-  // never aborts its own in-flight play().
   useEffect(() => {
     if (!song || !audioRef.current) return;
     const audio = audioRef.current;
@@ -174,7 +156,6 @@ const PlayerPage = () => {
     setIsPlayerMinimized(!isPlayerMinimized);
   };
 
-  /* ── Playback handlers ── */
   const togglePlay = () => {
     if (!audioRef.current) return;
     isPlaying ? audioRef.current.pause() : audioRef.current.play();
@@ -187,7 +168,6 @@ const PlayerPage = () => {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  // pure "what id comes next" resolver, reused by prefetch + handleNavigation
   const resolveNextId = (direction) => {
     try {
       const raw = localStorage.getItem("playersequence");
@@ -205,7 +185,6 @@ const PlayerPage = () => {
     }
   };
 
-  // advance the stored queue index without touching the currently loaded track
   const advanceQueueIndex = () => {
     try {
       const raw = localStorage.getItem("playersequence");
@@ -220,7 +199,6 @@ const PlayerPage = () => {
     }
   };
 
-  /* ── Queue navigation (buttons / media session / prefetch-miss fallback) ── */
   const handleNavigation = (direction) => {
     try {
       const raw = localStorage.getItem("playersequence") || false;
@@ -250,14 +228,12 @@ const PlayerPage = () => {
         return;
       }
 
-      // generating random int to play song randomly if there's no song left in the sequence
       playTrack(getRandomInt(1, 100));
     } catch (e) {
       console.error("Navigation error:", e);
     }
   };
 
-  /* ── Like toggle ── */
   const handleLikeClick = async () => {
     const prev = isLiked;
     setIsLiked(!prev);
@@ -267,8 +243,6 @@ const PlayerPage = () => {
       addNotification(result.error, "error");
     }
   };
-
-  const artUrl = art(song.id).larg;
 
   return (
     <div
@@ -300,16 +274,11 @@ const PlayerPage = () => {
         </div>
       )}
 
-      {/* Ambient background bloom */}
-
       <div
         className={styles.ambientBg}
         style={{ backgroundImage: `url(${artUrl})` }}
       />
 
-      {/* Hidden audio element — src is managed imperatively below, not via JSX,
-          so React's re-render after setSong() never re-writes it and aborts
-          an in-flight play() (see the sync effect above onCanPlay). */}
       <audio
         ref={audioRef}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
@@ -317,9 +286,6 @@ const PlayerPage = () => {
           const audio = audioRef.current;
           if (!audio || !duration) return;
 
-          // Prefetch the next track's data ~15s before this one ends, once
-          // per song, while audio is still actively playing — the tab has
-          // full network/CPU priority at this point, screen-off or not.
           if (
             duration - audio.currentTime <= 20 &&
             prefetchedForRef.current !== currentSongId &&
@@ -332,10 +298,6 @@ const PlayerPage = () => {
                 .then((res) => {
                   if (res?.song) {
                     nextTrackRef.current = { id: nextId, song: res.song };
-                    // Actually start downloading the audio file now, while
-                    // this tab still has full network access. This is what
-                    // makes onEnded's swap a cache hit instead of a fresh
-                    // (and possibly blocked) background network request.
                     const buffer = preloadAudioRef.current;
                     if (buffer) {
                       buffer.src = res.song.song_src;
@@ -371,12 +333,6 @@ const PlayerPage = () => {
           nextTrackRef.current = null;
 
           if (next) {
-            // Fast path: swap src and call play() directly on the DOM node,
-            // synchronously, BEFORE any setState — state updates can wait,
-            // playback can't. The URL was already downloaded into
-            // preloadAudioRef while this track was playing, so this load()
-            // should resolve from the browser's own cache instead of opening
-            // a brand-new background network connection.
             advanceQueueIndex();
             audio.src = next.song.song_src;
             audio.load();
@@ -385,20 +341,15 @@ const PlayerPage = () => {
               .then(() => setIsPlaying(true))
               .catch((err) => {
                 console.warn("Autoplay blocked:", err);
-                // If even the cache-primed load failed (e.g. prefetch didn't
-                // finish downloading in time), fall back to a plain
-                // network-driven next once we're back in the foreground.
                 setIsPlaying(false);
               });
 
-            // Sync React state / context after playback has already started.
             setIsPreFetchedSuccess(true);
             setSong(next.song);
             setIsLiked(false);
             playTrack(next.id);
+            setIsLoading(false);
           } else {
-            // Prefetch didn't land in time (e.g. a very short track) — fall
-            // back to the normal network-driven path.
             handleNavigation("next");
           }
         }}
@@ -409,7 +360,6 @@ const PlayerPage = () => {
           isPlayerMinimized ? styles.playerContent_mini : styles.playerContent
         }
       >
-        {/* Album art */}
         <div className={styles.imageContainer}>
           <img
             src={artUrl}
@@ -424,7 +374,6 @@ const PlayerPage = () => {
           />
         </div>
 
-        {/* Song info + action buttons */}
         <div className={styles.infoSection}>
           <div
             className={`${styles.details} josefin-sans-custom`}
@@ -459,7 +408,6 @@ const PlayerPage = () => {
                 justifyContent: "space-between",
               }}
             >
-              {/* Add to playlist */}
               <button
                 className={styles.actionBtn}
                 onClick={() => setIsPlaylistOpen(true)}
@@ -468,7 +416,6 @@ const PlayerPage = () => {
                 <ListPlus size={18} strokeWidth={1.8} />
               </button>
 
-              {/*share button */}
               <button
                 className={styles.actionBtn}
                 type="button"
@@ -505,7 +452,6 @@ const PlayerPage = () => {
                 </svg>
               </button>
 
-              {/* Like */}
               <button
                 className={`${styles.actionBtn} ${isLiked ? styles.actionBtnLiked : ""}`}
                 onClick={handleLikeClick}
@@ -518,7 +464,6 @@ const PlayerPage = () => {
                 />
               </button>
 
-              {/* loop button  */}
               <button
                 type="button"
                 className={styles.loop_btn}
@@ -573,7 +518,6 @@ const PlayerPage = () => {
           )}
         </div>
 
-        {/* Controls */}
         {!isPlayerMinimized && (
           <div className={styles.controlsSection}>
             <ProgressBar
@@ -618,7 +562,6 @@ const PlayerPage = () => {
             </div>
           </div>
         )}
-        {/* Visualiser */}
         {!isPlayerMinimized && (
           <div className={styles.topSection}>
             <MusicVisual isPlaying={isPlaying} />
@@ -626,7 +569,6 @@ const PlayerPage = () => {
         )}
       </div>
 
-      {/* Modals */}
       <PlaylistDisplay
         show={isPlaylistOpen}
         songId={currentSongId}
