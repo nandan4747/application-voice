@@ -87,7 +87,7 @@ const PlayerPage = () => {
       setIsLiked(false);
       try {
         const res = await getSongDetails(currentSongId);
-        console.log("fetching song details");
+        /*console.log("fetching song details");*/
         if (!res) {
           playTrack(getRandomInt(1, 120));
           return;
