@@ -301,10 +301,13 @@ const PlayerPage = () => {
             prefetchedForRef.current = currentSongId;
             const nextId = resolveNextId("next");
             if (nextId) {
+              console.log("pre fetching started");
               getSongDetails(nextId)
                 .then((res) => {
                   if (res?.song) {
+                    console.log("prefetch was success");
                     nextTrackRef.current = { id: nextId, song: res.song };
+                    console.log(`prefetch response : ${nextTrackRef.current}`);
                   }
                 })
                 .catch((err) => {
@@ -330,9 +333,13 @@ const PlayerPage = () => {
             audio.play();
             return;
           }
+          console.log("song ended");
+          console.log("loop is off");
+          console.log("trying to play next song ");
 
           const next = nextTrackRef.current;
           nextTrackRef.current = null;
+          console.log(`got the nextTrackRef data : ${next}`);
 
           if (next) {
             // Fast path: swap src and call play() directly on the DOM node,
@@ -342,18 +349,26 @@ const PlayerPage = () => {
             // playback. Data is already in hand from the prefetch, so there's
             // no network round-trip left to be delayed either.
             advanceQueueIndex();
+            console.log("executed advanceQueueIndex");
             audio.src = next.song.song_src;
+            console.log(`updated audio src with : ${audio.src}`);
             audio.load();
+            console.log("loaded the audio");
+            console.log("trying play now ");
             audio
               .play()
               .then(() => setIsPlaying(true))
               .catch((err) => console.warn("Autoplay blocked:", err));
 
             // Sync React state / context after playback has already started.
+            console.log("after the audio.paly() function");
             setIsPreFetchedSuccess(true);
             setSong(next.song);
+            console.log("next song has been set by setSong(next.song)");
             setIsLiked(false);
+            console.log("now executing playTrack()");
             playTrack(next.id);
+            console.log("after playTrack(next.id)");
           } else {
             // Prefetch didn't land in time (e.g. a very short track) — fall
             // back to the normal network-driven path.
