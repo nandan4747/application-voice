@@ -39,6 +39,11 @@ const PlayerPage = () => {
   } = useMusic();
   const audioRef = useRef(null);
 
+  // holds the fully-resolved next track ({ id, song }) once prefetched
+  const nextTrackRef = useRef(null);
+  // tracks which currentSongId we've already prefetched-for, so we only do it once per song
+  const prefetchedForRef = useRef(null);
+
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -49,12 +54,21 @@ const PlayerPage = () => {
   const [playInLoop, setPlayInLoop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotification();
+  // when true, the next fetchSong effect run is skipped because onEnded
+  // already swapped in the prefetched song synchronously
+  const [isPreFetchedSuccess, setIsPreFetchedSuccess] = useState(false);
 
   //const [isMinimized, setMinimized] = useState(false);
 
   /* ── Data fetching ── */
   useEffect(() => {
     if (!currentSongId) return;
+    // onEnded already swapped audioRef.current.src + song state directly —
+    // skip the redundant network fetch for the track we just prefetched.
+    if (isPreFetchedSuccess) {
+      setIsPreFetchedSuccess(false);
+      return;
+    }
     const fetchSong = async () => {
       setIsLoading(true);
       setIsPlaylistOpen(false);
@@ -75,7 +89,13 @@ const PlayerPage = () => {
       }
     };
     fetchSong();
-  }, [currentSongId, playTrack]);
+  }, [currentSongId, playTrack, isPreFetchedSuccess]);
+
+  // reset prefetch bookkeeping whenever the track actually changes
+  useEffect(() => {
+    prefetchedForRef.current = null;
+    nextTrackRef.current = null;
+  }, [currentSongId]);
 
   useEffect(() => {
     if (!currentSongId) return;
@@ -141,7 +161,40 @@ const PlayerPage = () => {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  /* ── Queue navigation ── */
+  // pure "what id comes next" resolver, reused by prefetch + handleNavigation
+  const resolveNextId = (direction) => {
+    try {
+      const raw = localStorage.getItem("playersequence");
+      if (!raw) return getRandomInt(1, 100);
+      const { track, currentIndex } = JSON.parse(raw);
+      if (!track) return getRandomInt(1, 100);
+      const queue = cache[track];
+      if (!queue) return null;
+      const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
+      if (next >= 0 && next < queue.length) return queue[next].id;
+      return getRandomInt(1, 100);
+    } catch (e) {
+      console.error("resolveNextId error:", e);
+      return null;
+    }
+  };
+
+  // advance the stored queue index without touching the currently loaded track
+  const advanceQueueIndex = () => {
+    try {
+      const raw = localStorage.getItem("playersequence");
+      if (!raw) return;
+      const { track, currentIndex } = JSON.parse(raw);
+      localStorage.setItem(
+        "playersequence",
+        JSON.stringify({ track, currentIndex: currentIndex + 1 }),
+      );
+    } catch (e) {
+      console.error("advanceQueueIndex error:", e);
+    }
+  };
+
+  /* ── Queue navigation (buttons / media session / prefetch-miss fallback) ── */
   const handleNavigation = (direction) => {
     try {
       const raw = localStorage.getItem("playersequence") || false;
@@ -233,6 +286,34 @@ const PlayerPage = () => {
         ref={audioRef}
         src={song.song_src}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
+        onTimeUpdate={() => {
+          const audio = audioRef.current;
+          if (!audio || !duration) return;
+
+          // Prefetch the next track's data ~15s before this one ends, once
+          // per song, while audio is still actively playing — the tab has
+          // full network/CPU priority at this point, screen-off or not.
+          if (
+            duration - audio.currentTime <= 15 &&
+            prefetchedForRef.current !== currentSongId &&
+            !playInLoop
+          ) {
+            prefetchedForRef.current = currentSongId;
+            const nextId = resolveNextId("next");
+            if (nextId) {
+              getSongDetails(nextId)
+                .then((res) => {
+                  if (res?.song) {
+                    nextTrackRef.current = { id: nextId, song: res.song };
+                  }
+                })
+                .catch((err) => {
+                  console.warn("Prefetch failed:", err);
+                  nextTrackRef.current = null;
+                });
+            }
+          }
+        }}
         onCanPlay={(e) => {
           e.target
             .play()
@@ -243,12 +324,41 @@ const PlayerPage = () => {
             });
         }}
         onEnded={() => {
+          const audio = audioRef.current;
           if (playInLoop) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play();
+            audio.currentTime = 0;
+            audio.play();
             return;
           }
-          handleNavigation("next");
+
+          const next = nextTrackRef.current;
+          nextTrackRef.current = null;
+
+          if (next) {
+            // Fast path: swap src and call play() directly on the DOM node,
+            // synchronously, BEFORE any setState. This is the actual fix —
+            // React's own scheduler can get throttled on a hidden/screen-off
+            // tab just like everything else, so state updates must not gate
+            // playback. Data is already in hand from the prefetch, so there's
+            // no network round-trip left to be delayed either.
+            advanceQueueIndex();
+            audio.src = next.song.song_src;
+            audio.load();
+            audio
+              .play()
+              .then(() => setIsPlaying(true))
+              .catch((err) => console.warn("Autoplay blocked:", err));
+
+            // Sync React state / context after playback has already started.
+            setIsPreFetchedSuccess(true);
+            setSong(next.song);
+            setIsLiked(false);
+            playTrack(next.id);
+          } else {
+            // Prefetch didn't land in time (e.g. a very short track) — fall
+            // back to the normal network-driven path.
+            handleNavigation("next");
+          }
         }}
       />
 

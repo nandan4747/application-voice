@@ -25,7 +25,7 @@ const queryClient = new QueryClient({
   },
 });
 function App() {
-  const { isPlayerMinimized, currentSongId } = useMusic();
+  const { isPlayerMinimized } = useMusic();
   return (
     <QueryClientProvider client={queryClient}>
       <div
@@ -35,7 +35,7 @@ function App() {
             : "global-overlay-layer-full-screen"
         }
       >
-        {currentSongId && <PlayerPage key={currentSongId} />}
+        <PlayerPager />
       </div>
       <Routes>
         <Route path="/" element={<Home />}></Route>
