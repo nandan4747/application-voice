@@ -43,6 +43,18 @@ const PlayerPage = () => {
   const nextTrackRef = useRef(null);
   // tracks which currentSongId we've already prefetched-for, so we only do it once per song
   const prefetchedForRef = useRef(null);
+  // a detached, off-DOM <audio> used purely to force the browser to actually
+  // download and cache the next track's bytes *while the current track is
+  // still playing* (full network priority). At onEnded we point the real
+  // audioRef at the same URL, which should then be a cache hit instead of a
+  // brand-new network request — new network requests for untouched URLs are
+  // what mobile Chrome blocks/fails on a hidden/screen-locked tab, which is
+  // the actual "NotSupportedError" you're seeing.
+  const preloadAudioRef = useRef(null);
+  if (!preloadAudioRef.current && typeof Audio !== "undefined") {
+    preloadAudioRef.current = new Audio();
+    preloadAudioRef.current.preload = "auto";
+  }
 
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -134,13 +146,10 @@ const PlayerPage = () => {
   // set .src/.load()/.play() directly on the node) is never redone here and
   // never aborts its own in-flight play().
   useEffect(() => {
-    console.log("inside imparitive effect");
     if (!song || !audioRef.current) return;
     const audio = audioRef.current;
     const targetSrc = new URL(song.song_src, window.location.href).href;
     if (audio.src === targetSrc) return;
-
-    console.log("setting song src to audio.src");
     audio.src = song.song_src;
     audio.load();
   }, [song]);
@@ -312,7 +321,7 @@ const PlayerPage = () => {
           // per song, while audio is still actively playing — the tab has
           // full network/CPU priority at this point, screen-off or not.
           if (
-            duration - audio.currentTime <= 15 &&
+            duration - audio.currentTime <= 20 &&
             prefetchedForRef.current !== currentSongId &&
             !playInLoop
           ) {
@@ -323,6 +332,15 @@ const PlayerPage = () => {
                 .then((res) => {
                   if (res?.song) {
                     nextTrackRef.current = { id: nextId, song: res.song };
+                    // Actually start downloading the audio file now, while
+                    // this tab still has full network access. This is what
+                    // makes onEnded's swap a cache hit instead of a fresh
+                    // (and possibly blocked) background network request.
+                    const buffer = preloadAudioRef.current;
+                    if (buffer) {
+                      buffer.src = res.song.song_src;
+                      buffer.load();
+                    }
                   }
                 })
                 .catch((err) => {
@@ -353,23 +371,34 @@ const PlayerPage = () => {
           nextTrackRef.current = null;
 
           if (next) {
-            console.log("song ended ");
+            // Fast path: swap src and call play() directly on the DOM node,
+            // synchronously, BEFORE any setState — state updates can wait,
+            // playback can't. The URL was already downloaded into
+            // preloadAudioRef while this track was playing, so this load()
+            // should resolve from the browser's own cache instead of opening
+            // a brand-new background network connection.
             advanceQueueIndex();
-
             audio.src = next.song.song_src;
-            console.log("changed song src");
             audio.load();
             audio
               .play()
               .then(() => setIsPlaying(true))
-              .catch((err) => console.warn("Autoplay blocked:", err));
-            console.log("ran .play()");
+              .catch((err) => {
+                console.warn("Autoplay blocked:", err);
+                // If even the cache-primed load failed (e.g. prefetch didn't
+                // finish downloading in time), fall back to a plain
+                // network-driven next once we're back in the foreground.
+                setIsPlaying(false);
+              });
+
+            // Sync React state / context after playback has already started.
             setIsPreFetchedSuccess(true);
             setSong(next.song);
             setIsLiked(false);
             playTrack(next.id);
-            console.log("after playTrack()");
           } else {
+            // Prefetch didn't land in time (e.g. a very short track) — fall
+            // back to the normal network-driven path.
             handleNavigation("next");
           }
         }}
