@@ -35,7 +35,7 @@ function App() {
             : "global-overlay-layer-full-screen"
         }
       >
-        <PlayerPager />
+        <PlayerPage />
       </div>
       <Routes>
         <Route path="/" element={<Home />}></Route>
