@@ -66,7 +66,9 @@ const PlayerPage = () => {
           playTrack(getRandomInt(1, 120));
           return;
         }
-        if (res?.song) setSong(res.song);
+        if (res?.song) {
+          setSong(res.song);
+        }
       } catch (err) {
         console.error("Failed to fetch song, retrying with random track:", err);
         playTrack(getRandomInt(1, 120));
@@ -76,6 +78,16 @@ const PlayerPage = () => {
     };
     fetchSong();
   }, [currentSongId, playTrack]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      //console.log("setting url ");
+      audioRef.current.src = song.song_src;
+      audioRef.current.currentTime = 0;
+      audioRef.current.load();
+      audioRef.current.play();
+    }
+  }, [song]);
 
   useEffect(() => {
     if (!currentSongId) return;
@@ -257,7 +269,6 @@ const PlayerPage = () => {
       {/* Hidden audio element */}
       <audio
         ref={audioRef}
-        src={song.song_src}
         onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
         onCanPlay={(e) => {
@@ -276,7 +287,7 @@ const PlayerPage = () => {
             return;
           }
 
-          handleNavigation("next", true);
+          handleNavigation("next");
         }}
       />
 

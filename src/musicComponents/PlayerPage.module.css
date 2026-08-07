@@ -382,8 +382,8 @@
   */
 
 .miniPlayer {
-  width: 35vw;
-  height: 70px;
+  width: 25vw;
+  height: 50px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -392,21 +392,21 @@
   transition: all 0.3s ease-in-out;
 
   /* Slight tint so content stays readable over the distortion */
-  background: rgba(0, 0, 0, 0.226);
+  background: rgba(0, 0, 0, 0.048);
 
   /* Fallback for browsers/situations where the SVG filter fails */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
   /* Fallback for browsers/situations where the SVG filter fails */
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(10px);
 
-  /* The actual magic: calling the SVG filter by its ID */
-  backdrop-filter: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><filter id="liquid-glass"><feTurbulence type="fractalNoise" baseFrequency="0.0009" numOctaves="10" result="warp"/><feDisplacementMap in="SourceGraphic" in2="warp" scale="69" xChannelSelector="R" yChannelSelector="G" result="distorted"/><feColorMatrix in="distorted" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="red"/><feColorMatrix in="distorted" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="green"/><feColorMatrix in="distorted" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="blue"/><feOffset in="red" dx="-0.9" dy="2.4" result="red_shifted"/><feOffset in="blue" dx="2" dy="-2.4" result="blue_shifted"/><feBlend mode="screen" in="red_shifted" in2="green" result="rg_combo"/><feBlend mode="screen" in="rg_combo" in2="blue_shifted" result="final_prism"/></filter></svg>#liquid-glass');
+  /* The actual magic: calling the SVG filter by its ID 
+  backdrop-filter: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"><filter id="liquid-glass"><feTurbulence type="fractalNoise" baseFrequency="0.0009" numOctaves="10" result="warp"/><feDisplacementMap in="SourceGraphic" in2="warp" scale="69" xChannelSelector="R" yChannelSelector="G" result="distorted"/><feColorMatrix in="distorted" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="red"/><feColorMatrix in="distorted" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="green"/><feColorMatrix in="distorted" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="blue"/><feOffset in="red" dx="-0.9" dy="2.4" result="red_shifted"/><feOffset in="blue" dx="2" dy="-2.4" result="blue_shifted"/><feBlend mode="screen" in="red_shifted" in2="green" result="rg_combo"/><feBlend mode="screen" in="rg_combo" in2="blue_shifted" result="final_prism"/></filter></svg>#liquid-glass');*/
 
-  border: 0.3px solid rgba(255, 255, 255, 0.226);
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+  border: 0.3px solid rgba(255, 255, 255, 0.327);
+  /*box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);*/
   transition: all ease 1s;
 }
 
@@ -423,9 +423,9 @@
 
 /* shrink album art in mini mode */
 .miniPlayer .imageContainer {
-  width: 46px;
-  height: 46px;
-  min-width: 46px;
+  width: 36px;
+  height: 36px;
+
   margin-bottom: 0;
 }
 
@@ -444,7 +444,9 @@
   gap: 4px;
   align-items: center;
   flex: 1;
-  min-width: 0;
+
+  height: auto;
+  width: auto;
 }
 
 .miniPlayer .details h2 {
@@ -474,6 +476,6 @@
 /* .miniPlayer's mobile view*/
 @media (max-width: 500px) {
   .miniPlayer {
-    width: 90vw;
+    width: 70vw;
   }
 }

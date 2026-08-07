@@ -7,30 +7,27 @@
   width: auto;
   height: auto;
   transition: all ease 0.9s;
-  
-  
 }
 .global-overlay-layer-mini-screen {
   position: fixed;
   z-index: 999;
-  left: 10px;
-  bottom: 30px;
+
+  bottom: 20px;
   top: auto;
-  width: auto;
+  width: 100%;
   height: auto;
   transition: all ease 0.9s;
- 
- 
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* mobile view */
-@media (max-width:500px){
-.global-overlay-layer-mini-screen{
+@media (max-width: 500px) {
+  .global-overlay-layer-mini-screen {
     width: 100vw;
     display: flex;
     justify-content: center;
     left: auto;
-    
-}
-
+  }
 }

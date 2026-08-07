@@ -11,7 +11,6 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
   const loc = useLocation();
   const playlistId = loc.state?.playlistId;
   const playlistName = loc.state?.playlistName ?? "Playlist";
-  //const imageUrl = `https://picsum.photos/seed/${playlistId + 200}/400/400`;
   const imageUrl = art(playlistId).medium;
   const token = localStorage.getItem("token");
 
@@ -52,12 +51,16 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
         cursors[cursorKey] = result.nextCursor || null;
         setHasMore(!!cursors[cursorKey]);
 
-        setFetchedSongs((prev) => {
-          const current = cachedSongs ?? prev;
-          const merged = [...current, ...result.songs];
-          setCacheData(apiUrl, merged);
-          return merged;
-        });
+        // FIX 1: Compute the new array OUTSIDE the state updater callback.
+        // FIX 2: Deduplicate the songs array to stop the duplicate key warnings.
+        const currentList = cachedSongs ?? fetchedSongs;
+        const mergedList = [...currentList, ...result.songs];
+        const uniqueSongs = Array.from(
+          new Map(mergedList.map((song) => [song.id, song])).values(),
+        );
+
+        setFetchedSongs(uniqueSongs);
+        setCacheData(apiUrl, uniqueSongs); // Now perfectly safe!
       } catch (err) {
         console.error(err);
       } finally {
@@ -65,14 +68,14 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
         setLoading(false);
       }
     },
-    [apiUrl, cursorKey, token, cachedSongs],
+    [apiUrl, cursorKey, token, cachedSongs, fetchedSongs, setCacheData],
   );
 
   // Initial load
   useEffect(() => {
     if (cachedSongs) return;
     fetchSongs();
-  }, [apiUrl, cachedSongs]);
+  }, [apiUrl, cachedSongs, fetchSongs]);
 
   // Infinite scroll
   useEffect(() => {
@@ -90,7 +93,7 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, fetchSongs]);
+  }, [hasMore, fetchSongs, cursorKey]);
 
   const handleRemoveSong = async (songId, playListId) => {
     const url = `${Details.domain}user/playlist/song?playListId=${playListId}&songId=${songId}`;
@@ -176,7 +179,6 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
           </div>
         ))}
 
-        {/* Sentinel triggers next fetch when scrolled into view */}
         <div ref={sentinelRef} style={{ height: 1 }} />
 
         {loading && (
@@ -187,6 +189,7 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
           </div>
         )}
 
+        {/* FIX 3: Cleaned up the SVG attributes to make React happy */}
         {!hasMore && songs.length > 0 && (
           <div style={{ justifySelf: "center" }}>
             <svg
@@ -196,10 +199,10 @@ const PlaylistSongs = ({ cursorKey = "playlist" }) => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-book-open-check-icon lucide-book-open-check"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-book-open-check-icon lucide-book-open-check"
             >
               <path d="M12 21V7" />
               <path d="m16 12 2 2 4-4" />
