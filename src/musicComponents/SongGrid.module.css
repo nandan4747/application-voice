@@ -1,10 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap");
 
 .container {
+  --card-w: 175px;
+  --gap: 14px;
   margin: 40px 0;
   padding: 0 5%;
   max-width: 100vw;
- 
 }
 
 /* ── Header ── */
@@ -53,18 +54,9 @@
 .scrollRow {
   display: flex;
   flex-wrap: nowrap;
-  overflow-x: auto;
-  gap: 14px;
-  /* padding: 8px 2px 24px; */
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  /* Hide scrollbar */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollRow::-webkit-scrollbar {
-  display: none;
+  overflow: hidden;
+  gap: var(--gap);
+  position: relative;
 }
 
 .cardWrapper {
@@ -117,7 +109,8 @@
 }
 
 .skeleton {
-  flex: 0 0 175px;
+  flex: 0 0 var(--card-w);
+
   border-radius: 14px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.04);
@@ -171,7 +164,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
- 
+
   color: rgba(255, 255, 255, 0.2);
 }
 
@@ -208,6 +201,7 @@
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.5);
   transition: all 0.2s ease;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -234,5 +228,3 @@
   width: 20px;
   height: 20px;
 }
-
-
