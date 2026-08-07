@@ -12,9 +12,11 @@ const SongLinkHandler = () => {
 
   useEffect(() => {
     if (id) {
+      //console.log(`playing new track with id : ${id} `);
       playTrack(id);
 
       if (shallNavigate) {
+        //console.log("navigated");
         navigate("/", { replace: true });
       }
     }

@@ -24,7 +24,7 @@ import MusicVisual from "../animations/MusicVisual";
 import { getRandomInt } from "../api/mechanism";
 import { Details } from "../api/HostDetails";
 import { art } from "../api/artProvider";
-import ProgressBar from "./ProgressBar";
+import { useNavigate } from "react-router-dom";
 
 import { useNotification } from "../context/NotificationContext";
 
@@ -39,17 +39,9 @@ const PlayerPage = () => {
   } = useMusic();
   const audioRef = useRef(null);
 
-  const nextTrackRef = useRef(null);
-  const prefetchedForRef = useRef(null);
-  const preloadAudioRef = useRef(null);
-  if (!preloadAudioRef.current && typeof Audio !== "undefined") {
-    preloadAudioRef.current = new Audio();
-    preloadAudioRef.current.preload = "auto";
-  }
-
   const [song, setSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-
+  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
@@ -57,15 +49,13 @@ const PlayerPage = () => {
   const [playInLoop, setPlayInLoop] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { addNotification } = useNotification();
-  const [isPreFetchedSuccess, setIsPreFetchedSuccess] = useState(false);
+  const nav = useNavigate();
+
+  //const [isMinimized, setMinimized] = useState(false);
 
   /* ── Data fetching ── */
   useEffect(() => {
     if (!currentSongId) return;
-    if (isPreFetchedSuccess) {
-      setIsPreFetchedSuccess(false);
-      return;
-    }
     const fetchSong = async () => {
       setIsLoading(true);
       setIsPlaylistOpen(false);
@@ -85,12 +75,7 @@ const PlayerPage = () => {
       }
     };
     fetchSong();
-  }, [currentSongId, playTrack, isPreFetchedSuccess]);
-
-  useEffect(() => {
-    prefetchedForRef.current = null;
-    nextTrackRef.current = null;
-  }, [currentSongId]);
+  }, [currentSongId, playTrack]);
 
   useEffect(() => {
     if (!currentSongId) return;
@@ -103,10 +88,6 @@ const PlayerPage = () => {
     };
     checkFlag();
   }, [currentSongId]);
-
-  // artUrl is a pure derivation of `song` — no need for its own state,
-  // it's just recomputed each render (that's what caused the infinite loop).
-  const artUrl = song ? art(song.id).larg : "";
 
   useEffect(() => {
     if (!song || !("mediaSession" in navigator)) return;
@@ -127,18 +108,27 @@ const PlayerPage = () => {
     );
   }, [song]);
 
-  useEffect(() => {
-    if (!song || !audioRef.current) return;
-    const audio = audioRef.current;
-    const targetSrc = new URL(song.song_src, window.location.href).href;
-    if (audio.src === targetSrc) return;
-    audio.src = song.song_src;
-    audio.load();
-  }, [song]);
+  /*
+  const resolveNextId = (direction) => {
+    try {
+      const raw = localStorage.getItem("playersequence");
+      if (!raw) return getRandomInt(1, 100);
+      const { track, currentIndex } = JSON.parse(raw);
+      if (!track) return getRandomInt(1, 100);
+      const queue = cache[track];
+      if (!queue) return null;
+      const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
+      if (next >= 0 && next < queue.length) return queue[next].id;
+      return getRandomInt(1, 100);
+    } catch (e) {
+      console.error("resolveNextId error:", e);
+      return null;
+    }
+  };*/
 
   if (!currentSongId) return null;
 
-  if (!song) {
+  if (!song || isLoading) {
     return (
       <div
         className={
@@ -156,10 +146,16 @@ const PlayerPage = () => {
     setIsPlayerMinimized(!isPlayerMinimized);
   };
 
+  /* ── Playback handlers ── */
   const togglePlay = () => {
     if (!audioRef.current) return;
     isPlaying ? audioRef.current.pause() : audioRef.current.play();
     setIsPlaying(!isPlaying);
+  };
+
+  const handleSliderChange = (e) => {
+    audioRef.current.currentTime = e.target.value;
+    setCurrentTime(Number(e.target.value));
   };
 
   const formatTime = (t) => {
@@ -168,38 +164,8 @@ const PlayerPage = () => {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  const resolveNextId = (direction) => {
-    try {
-      const raw = localStorage.getItem("playersequence");
-      if (!raw) return getRandomInt(1, 100);
-      const { track, currentIndex } = JSON.parse(raw);
-      if (!track) return getRandomInt(1, 100);
-      const queue = cache[track];
-      if (!queue) return null;
-      const next = direction === "next" ? currentIndex + 1 : currentIndex - 1;
-      if (next >= 0 && next < queue.length) return queue[next].id;
-      return getRandomInt(1, 100);
-    } catch (e) {
-      console.error("resolveNextId error:", e);
-      return null;
-    }
-  };
-
-  const advanceQueueIndex = () => {
-    try {
-      const raw = localStorage.getItem("playersequence");
-      if (!raw) return;
-      const { track, currentIndex } = JSON.parse(raw);
-      localStorage.setItem(
-        "playersequence",
-        JSON.stringify({ track, currentIndex: currentIndex + 1 }),
-      );
-    } catch (e) {
-      console.error("advanceQueueIndex error:", e);
-    }
-  };
-
-  const handleNavigation = (direction) => {
+  /* ── Queue navigation ── */
+  const handleNavigation = (direction, endtrigger = false) => {
     try {
       const raw = localStorage.getItem("playersequence") || false;
 
@@ -223,17 +189,27 @@ const PlayerPage = () => {
         );
         const songId = queue[next].id;
 
-        playTrack(songId);
+        if (endtrigger) {
+          nav(`/play/${songId}?navigate=true`);
+          return;
+        }
 
+        playTrack(songId);
         return;
       }
 
+      // generating random int to play song randomly if there's no song left in the sequence
+      if (endtrigger) {
+        nav(`/play/${getRandomInt(1, 120)}?navigate=true`);
+        return;
+      }
       playTrack(getRandomInt(1, 100));
     } catch (e) {
       console.error("Navigation error:", e);
     }
   };
 
+  /* ── Like toggle ── */
   const handleLikeClick = async () => {
     const prev = isLiked;
     setIsLiked(!prev);
@@ -244,17 +220,14 @@ const PlayerPage = () => {
     }
   };
 
+  const artUrl = art(song.id).larg;
+
   return (
     <div
       className={
         isPlayerMinimized ? styles.miniPlayer : styles.fullPlayerContainer
       }
     >
-      {isLoading && (
-        <div className={styles.loadingScreen}>
-          <SearchLoader />
-        </div>
-      )}
       {!isPlayerMinimized && (
         <div className={styles.back_btn} onClick={handleMinimizeToggle}>
           <svg
@@ -274,44 +247,19 @@ const PlayerPage = () => {
         </div>
       )}
 
+      {/* Ambient background bloom */}
+
       <div
         className={styles.ambientBg}
         style={{ backgroundImage: `url(${artUrl})` }}
       />
 
+      {/* Hidden audio element */}
       <audio
         ref={audioRef}
+        src={song.song_src}
+        onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
-        onTimeUpdate={() => {
-          const audio = audioRef.current;
-          if (!audio || !duration) return;
-
-          if (
-            duration - audio.currentTime <= 20 &&
-            prefetchedForRef.current !== currentSongId &&
-            !playInLoop
-          ) {
-            prefetchedForRef.current = currentSongId;
-            const nextId = resolveNextId("next");
-            if (nextId) {
-              getSongDetails(nextId)
-                .then((res) => {
-                  if (res?.song) {
-                    nextTrackRef.current = { id: nextId, song: res.song };
-                    const buffer = preloadAudioRef.current;
-                    if (buffer) {
-                      buffer.src = res.song.song_src;
-                      buffer.load();
-                    }
-                  }
-                })
-                .catch((err) => {
-                  console.warn("Prefetch failed:", err);
-                  nextTrackRef.current = null;
-                });
-            }
-          }
-        }}
         onCanPlay={(e) => {
           e.target
             .play()
@@ -322,36 +270,13 @@ const PlayerPage = () => {
             });
         }}
         onEnded={() => {
-          const audio = audioRef.current;
           if (playInLoop) {
-            audio.currentTime = 0;
-            audio.play();
+            audioRef.current.currentTime = 0;
+            audioRef.current.play();
             return;
           }
 
-          const next = nextTrackRef.current;
-          nextTrackRef.current = null;
-
-          if (next) {
-            advanceQueueIndex();
-            audio.src = next.song.song_src;
-            audio.load();
-            audio
-              .play()
-              .then(() => setIsPlaying(true))
-              .catch((err) => {
-                console.warn("Autoplay blocked:", err);
-                setIsPlaying(false);
-              });
-
-            setIsPreFetchedSuccess(true);
-            setSong(next.song);
-            setIsLiked(false);
-            playTrack(next.id);
-            setIsLoading(false);
-          } else {
-            handleNavigation("next");
-          }
+          handleNavigation("next", true);
         }}
       />
 
@@ -360,6 +285,7 @@ const PlayerPage = () => {
           isPlayerMinimized ? styles.playerContent_mini : styles.playerContent
         }
       >
+        {/* Album art */}
         <div className={styles.imageContainer}>
           <img
             src={artUrl}
@@ -374,6 +300,7 @@ const PlayerPage = () => {
           />
         </div>
 
+        {/* Song info + action buttons */}
         <div className={styles.infoSection}>
           <div
             className={`${styles.details} josefin-sans-custom`}
@@ -408,6 +335,7 @@ const PlayerPage = () => {
                 justifyContent: "space-between",
               }}
             >
+              {/* Add to playlist */}
               <button
                 className={styles.actionBtn}
                 onClick={() => setIsPlaylistOpen(true)}
@@ -416,6 +344,7 @@ const PlayerPage = () => {
                 <ListPlus size={18} strokeWidth={1.8} />
               </button>
 
+              {/*share button */}
               <button
                 className={styles.actionBtn}
                 type="button"
@@ -452,6 +381,7 @@ const PlayerPage = () => {
                 </svg>
               </button>
 
+              {/* Like */}
               <button
                 className={`${styles.actionBtn} ${isLiked ? styles.actionBtnLiked : ""}`}
                 onClick={handleLikeClick}
@@ -464,6 +394,7 @@ const PlayerPage = () => {
                 />
               </button>
 
+              {/* loop button  */}
               <button
                 type="button"
                 className={styles.loop_btn}
@@ -518,13 +449,22 @@ const PlayerPage = () => {
           )}
         </div>
 
+        {/* Controls */}
         {!isPlayerMinimized && (
           <div className={styles.controlsSection}>
-            <ProgressBar
-              audioRef={audioRef}
-              duration={duration}
-              formatTime={formatTime}
+            <input
+              type="range"
+              className={styles.slider}
+              min="0"
+              max={duration || 0}
+              value={currentTime}
+              step="0.1"
+              onChange={handleSliderChange}
             />
+            <div className={styles.timeInfo}>
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
 
             <div className={styles.mainButtons}>
               <button
@@ -562,6 +502,7 @@ const PlayerPage = () => {
             </div>
           </div>
         )}
+        {/* Visualiser */}
         {!isPlayerMinimized && (
           <div className={styles.topSection}>
             <MusicVisual isPlaying={isPlaying} />
@@ -569,6 +510,7 @@ const PlayerPage = () => {
         )}
       </div>
 
+      {/* Modals */}
       <PlaylistDisplay
         show={isPlaylistOpen}
         songId={currentSongId}
