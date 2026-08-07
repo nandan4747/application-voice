@@ -370,7 +370,7 @@
   transition: all 0.3s ease-in-out;
 
   /* Slight tint so content stays readable over the distortion */
-  background: rgba(0, 0, 0, 0.19);
+  background: rgba(0, 0, 0, 0.1);
 
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
