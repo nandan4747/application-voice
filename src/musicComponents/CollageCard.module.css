@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-width: fit-content;
+  height: fit-content;
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;

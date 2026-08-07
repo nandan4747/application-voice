@@ -109,8 +109,12 @@ const SongGrid = ({ title, apiUrl, seeMore = false, cursorKey = "" }) => {
   }, [recomputeColumns]);
 
   const overflowing = columns > 0 && songs.length > columns;
-  const visibleSongs = overflowing ? songs.slice(0, columns - 1) : songs;
-  const collageSongs = overflowing ? songs.slice(columns - 1) : [];
+
+  // Force a minimum of 1 visible song card so they don't go extinct on small screens
+  const maxVisible = Math.max(columns - 1, 1);
+
+  const visibleSongs = overflowing ? songs.slice(0, maxVisible) : songs;
+  const collageSongs = overflowing ? songs.slice(maxVisible) : [];
 
   const goToFullList = () => {
     nav("/batchplay", { state: { apiUrl, cursorKey } });

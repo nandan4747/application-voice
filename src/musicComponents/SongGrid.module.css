@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap");
 
 .container {
-  --card-w: 175px;
-  --gap: 14px;
+  --card-w: clamp(120px, 28vw, 180px);
+  --gap: 12px;
   margin: 40px 0;
   padding: 0 5%;
   max-width: 100vw;
@@ -54,11 +54,15 @@
 .scrollRow {
   display: flex;
   flex-wrap: nowrap;
-  overflow: hidden;
+  overflow-x: auto; /* Let them scroll! */
   gap: var(--gap);
   position: relative;
+  width: 100%;
+  scrollbar-width: none; /* Firefox */
 }
-
+.scrollRow::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
 .cardWrapper {
   flex: 0 0 auto;
   /* staggered fade-in */
@@ -136,6 +140,18 @@
   background: rgba(255, 255, 255, 0.07);
   animation: shimmer 1.6s ease-in-out infinite;
   animation-delay: 0.15s;
+}
+
+.inlineMoreBadge {
+  flex: 1 1 auto;
+  min-width: 60px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.6);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+  padding: 8px 12px;
 }
 
 .skeletonSub {

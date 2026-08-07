@@ -14,8 +14,7 @@ const SongCard = ({
   currentIndex,
 }) => {
   const { playTrack } = useMusic();
-  // const imageUrl = `https://picsum.photos/seed/${songId}/400/400`;
-  //const imageUrl = `https://loremflickr.com/200/200/music,abstract?lock=${songId}`;
+
   const imageUrl = art(songId).medium;
 
   const handleClick = () => {
@@ -25,7 +24,6 @@ const SongCard = ({
     };
     localStorage.setItem("playersequence", JSON.stringify(sequenceObj));
     playTrack(songId);
-    //navigate(`/play/${songId}`);
   };
 
   return (
