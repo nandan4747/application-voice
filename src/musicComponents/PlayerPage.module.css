@@ -26,17 +26,14 @@
 
   position: relative;
   overflow: scroll;
-  background: #0a0a0af9;
-
-  /* Fallback for browsers/situations where the SVG filter fails */
-  backdrop-filter: blur(10px);
+  background: rgba(10, 10, 10, 0.976); /* Bulletproof transparency */
   -webkit-backdrop-filter: blur(10px);
-
-  /* The actual magic: calling the SVG filter by its ID */
+  backdrop-filter: blur(10px);
 
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
 
   transition: all ease 0.9s;
+  transform: translateZ(0);
 }
 
 /*mini bottom player*/
@@ -373,14 +370,15 @@
   transition: all 0.3s ease-in-out;
 
   /* Slight tint so content stays readable over the distortion */
-  background: rgba(0, 0, 0, 0.101);
+  background: rgba(0, 0, 0, 0.19);
 
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 
   border: 0.3px solid rgba(255, 255, 255, 0.327);
   /*box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);*/
   transition: all ease 1s;
+  transform: translateZ(0);
 }
 
 .playerContent_mini {

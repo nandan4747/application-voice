@@ -7,6 +7,7 @@
   width: auto;
   height: auto;
   transition: all ease 0.9s;
+  isolation: isolate;
 }
 .global-overlay-layer-mini-screen {
   position: fixed;
@@ -14,12 +15,10 @@
 
   bottom: 20px;
   top: auto;
-  width: 100%;
+
   height: auto;
   transition: all ease 0.9s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transform: translateX(-50%) translateZ(0);
 }
 
 /* mobile view */
