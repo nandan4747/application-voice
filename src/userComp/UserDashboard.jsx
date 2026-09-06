@@ -19,7 +19,7 @@ import {
 import styles from "./UserDashboard.module.css";
 import { Details } from "../api/HostDetails";
 import { useNavigate } from "react-router-dom";
-import Toast from "../NotificationComp/Toast";
+import { useNotification } from "../context/NotificationContext.jsx";
 import { UpdatePasswordForm } from "../forms/UpdatePasswordFrom";
 import { useMusic } from "../MusicContext";
 import { AlertDailog } from "../NotificationComp/AlertDailog.jsx";
@@ -109,11 +109,6 @@ const UserDashboard = () => {
   const [activeGenre, setActiveGenre] = useState(
     () => localStorage.getItem("genre") || "",
   );
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-    type: "success",
-  });
 
   // ── Infinite-scroll state (local only — extra pages aren't cached) ──
   const [extraFavorites, setExtraFavorites] = useState([]);
@@ -126,6 +121,8 @@ const UserDashboard = () => {
     message: "message",
     subHeading: "sub heading",
   });
+
+  const { addNotification } = useNotification();
 
   const token = localStorage.getItem("token");
 
@@ -209,9 +206,6 @@ const UserDashboard = () => {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [activeTab, loadMoreLiked]);
-
-  const showToast = (message, type = "success") =>
-    setToast({ show: true, message, type });
 
   const onAlertSuccess = async () => {
     /*
@@ -401,7 +395,7 @@ const UserDashboard = () => {
                   onClick={() => {
                     localStorage.setItem("genre", g);
                     setActiveGenre(g);
-                    showToast(`Recommendations set to ${g}`);
+                    addNotification(`preference changes to ${g}`);
                   }}
                 >
                   {g}
@@ -437,6 +431,25 @@ const UserDashboard = () => {
             </li>
           ))}
         </ul>
+        <div className={styles.mobileTabHolder}>
+          <div className={styles.mobileTab}>
+            {MENU_OPTIONS.map((option) => {
+              if (option.id === "home") return;
+              return (
+                <div
+                  id={option.id}
+                  onClick={() => setActiveTab(option.id)}
+                  className={
+                    activeTab === option.id ? styles.activeMobileTabOption : ""
+                  }
+                >
+                  {option.icon}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {isCreator && (
           <button className={styles.studioBtn} onClick={() => nav("/studio")}>
             <Zap size={14} /> Admin Studio
@@ -472,7 +485,7 @@ const UserDashboard = () => {
       </nav>
 
       <main className={styles.mainContent}>{renderContent()}</main>
-      {toast.show && <Toast message={toast.message} type={toast.type} />}
+
       {showAlertDailog && (
         <div
           style={{

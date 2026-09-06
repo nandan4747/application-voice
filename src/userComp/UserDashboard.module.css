@@ -114,6 +114,35 @@
   color: var(--accent);
 }
 
+/* mobile tabs */
+
+.mobileTabHolder {
+  display: none;
+}
+
+.mobileTab {
+  display: flex;
+  width: 95%;
+
+  background-color: #1111114a;
+  border: solid rgba(128, 128, 128, 0.338) 0.3px;
+  backdrop-filter: blur(10px);
+
+  border-radius: 16px;
+  justify-content: space-between;
+  padding: 12px 5% 10px 5%;
+}
+
+.activeMobileTabOption {
+  color: var(--accent);
+  svg {
+    color: var(--accent);
+    fill: var(--accent);
+  }
+  border-bottom: solid 1px var(--accent);
+  padding-bottom: 4px;
+}
+
 /* ─── Studio Button ─── */
 .studioBtn {
   display: flex;
@@ -532,6 +561,16 @@
     flex-direction: column;
   }
 
+  .mobileTabHolder {
+    position: fixed;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    left: 0;
+    bottom: 10px;
+  }
+
   .sidebar {
     width: 100%;
     height: auto;
@@ -546,11 +585,7 @@
   }
 
   .menuList {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 6px;
-    padding-bottom: 14px;
-    scrollbar-width: none;
+    display: none;
   }
 
   .menuList::-webkit-scrollbar {

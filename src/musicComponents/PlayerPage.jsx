@@ -19,7 +19,6 @@ import SearchLoader from "../animations/SearchLoader";
 import PlaylistDisplay from "../playlistComp/PlaylistDisplay";
 import CreatePlaylistModal from "../playlistComp/CreatePlaylistModal";
 import { useMusic } from "../MusicContext";
-import NavBar from "../navbarComp/Navbar";
 import MusicVisual from "../animations/MusicVisual";
 import { getRandomInt } from "../api/mechanism";
 import { Details } from "../api/HostDetails";

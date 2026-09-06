@@ -13,8 +13,9 @@
 
 .main.scrolled {
   background-color: rgba(21, 21, 21, 0.811);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
+  border-bottom: solid rgba(91, 91, 91, 0.553) 0.3px;
 }
 
 .logo_container {
