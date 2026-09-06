@@ -78,6 +78,7 @@ const PlayerPage = () => {
     fetchSong();
   }, [currentSongId, playTrack]);
 
+  /*
   useEffect(() => {
     if (audioRef.current) {
       //console.log("setting url ");
@@ -86,7 +87,7 @@ const PlayerPage = () => {
       audioRef.current.load();
       audioRef.current.play();
     }
-  }, [song]);
+  }, [song]);*/
 
   useEffect(() => {
     if (!currentSongId) return;
@@ -268,6 +269,7 @@ const PlayerPage = () => {
       {/* Hidden audio element */}
       <audio
         ref={audioRef}
+        src={song.song_src}
         onTimeUpdate={() => setCurrentTime(audioRef.current.currentTime)}
         onLoadedMetadata={() => setDuration(audioRef.current.duration)}
         onCanPlay={(e) => {
