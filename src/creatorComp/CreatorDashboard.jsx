@@ -1,6 +1,6 @@
 // CreatorDashboard.jsx
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { getCreatorSongs } from "../api/creatorFunctions";
+import { getCreatorSongs, waitForSong } from "../api/creatorFunctions";
 import AnalysisCard from "./AnalysisCard";
 import styles from "./CreatorDashboard.module.css";
 import { BarChart3, TrendingUp, Plus } from "lucide-react";
@@ -19,8 +19,15 @@ const CreatorDashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const sentinelRef = useRef(null);
 
-  const handleUploadSuccess = (newSong) => {
-    setSongs((prev) => [newSong, ...prev]);
+  const handleUploadSuccess = async (path) => {
+    const res = await waitForSong(path);
+    if (res.success) {
+      setSongs((prev) =>
+        prev.some((s) => s.id === res.song.id) ? prev : [res.song, ...prev],
+      );
+    } else {
+      addNotification("Failed to confirm upload. Please check later.", "error");
+    }
   };
 
   // Initial load

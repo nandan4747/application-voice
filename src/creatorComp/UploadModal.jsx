@@ -28,18 +28,14 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     e.preventDefault();
     if (!file) return setError("No song, no vibe. Select a file.");
 
+    setError("");
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append("songName", songName);
-    formData.append("genre", genre);
-    formData.append("songFile", file);
-    formData.append("tags", tags);
 
-    const result = await uploadSongTrack(formData);
+    const result = await uploadSongTrack({ file, songName, genre, tags });
 
     if (result.success) {
-      onUploadSuccess(result.song);
-      onClose(); // Close modal on success
+      onUploadSuccess?.(result.path);
+      onClose();
     } else {
       setError(result.error);
     }
