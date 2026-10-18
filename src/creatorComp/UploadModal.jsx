@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Upload, X, Music, CheckCircle2, Loader2 } from "lucide-react";
 import { uploadSongTrack } from "../api/creatorFunctions";
 import styles from "./UploadModal.module.css";
@@ -34,7 +34,7 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     const result = await uploadSongTrack({ file, songName, genre, tags });
 
     if (result.success) {
-      onUploadSuccess?.(result.path);
+      onUploadSuccess?.({ path: result.path, songName, genre });
       onClose();
     } else {
       setError(result.error);

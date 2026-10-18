@@ -1,11 +1,12 @@
 // CreatorDashboard.jsx
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { getCreatorSongs, waitForSong } from "../api/creatorFunctions";
 import AnalysisCard from "./AnalysisCard";
 import styles from "./CreatorDashboard.module.css";
 import { BarChart3, TrendingUp, Plus } from "lucide-react";
 import UploadModal from "./UploadModal";
 import { useNotification } from "../context/NotificationContext";
+import ProcessingCard from "./ProcessingCard";
 
 const CreatorDashboard = () => {
   const [songs, setSongs] = useState([]);
@@ -15,18 +16,28 @@ const CreatorDashboard = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { addNotification } = useNotification();
+  const [processing, setProcessing] = useState([]);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const sentinelRef = useRef(null);
 
-  const handleUploadSuccess = async (path) => {
+  const handleUploadSuccess = async ({ path, songName, genre }) => {
+    setProcessing((prev) => [{ path, title: songName, genre }, ...prev]);
+
     const res = await waitForSong(path);
+
+    setProcessing((prev) => prev.filter((p) => p.path !== path));
+
     if (res.success) {
       setSongs((prev) =>
         prev.some((s) => s.id === res.song.id) ? prev : [res.song, ...prev],
       );
+      addNotification("Your track is live!", "success");
     } else {
-      addNotification("Failed to confirm upload. Please check later.", "error");
+      addNotification(
+        "Still processing. Refresh in a moment to check.",
+        "error",
+      );
     }
   };
 
@@ -116,6 +127,9 @@ const CreatorDashboard = () => {
       </div>
 
       <div className={styles.songGrid}>
+        {processing.map((p) => (
+          <ProcessingCard key={p.path} title={p.title} genre={p.genre} />
+        ))}
         {songs.length > 0 ? (
           songs.map((song) => (
             <AnalysisCard
